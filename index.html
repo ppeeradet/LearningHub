@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🌟 BamBam Learning Universe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0f1e;
+  --card-bg: rgba(255,255,255,0.06);
+  --card-border: rgba(255,255,255,0.12);
+  --gold: #fbbf24;
+  --pink: #f472b6;
+  --teal: #34d399;
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --orange: #fb923c;
+  --red: #f87171;
+  --white: #f0f4ff;
+  --muted: rgba(240,244,255,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100%;background:var(--bg);
+  font-family:'Fredoka','Sarabun',sans-serif;color:var(--white);overflow-x:hidden;}
+
+/* ── BACKGROUND ── */
+.cosmos{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.cosmos::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99,67,255,0.18) 0%, transparent 60%),
+             radial-gradient(ellipse 60% 50% at 80% 80%, rgba(244,114,182,0.12) 0%, transparent 60%),
+             radial-gradient(ellipse 50% 40% at 50% 50%, rgba(52,211,153,0.07) 0%, transparent 70%);}
+.star-field{position:absolute;inset:0;}
+
+/* ── LAYOUT ── */
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 16px 80px;}
+
+/* ── HEADER ── */
+.hdr{text-align:center;padding:36px 0 28px;}
+.hdr-logo{font-size:clamp(2rem,7vw,3.2rem);font-weight:700;line-height:1.1;
+  background:linear-gradient(135deg,var(--gold) 0%,var(--pink) 50%,var(--purple) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 30px rgba(251,191,36,0.3));}
+.hdr-rocket{font-size:3rem;display:block;animation:float 3s ease-in-out infinite;margin-bottom:8px;}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-12px) rotate(5deg)}}
+.hdr-sub{color:var(--muted);font-size:clamp(.9rem,2.5vw,1.1rem);margin-top:8px;letter-spacing:.5px;}
+.hdr-stats{display:flex;gap:16px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+.stat-pill{padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);font-size:.85rem;color:var(--muted);
+  display:flex;align-items:center;gap:6px;}
+.stat-pill span{color:var(--white);font-weight:600;}
+
+/* ── SEARCH ── */
+.search-bar{margin-bottom:20px;position:relative;}
+.search-bar input{width:100%;padding:13px 16px 13px 44px;
+  background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);
+  border-radius:14px;color:var(--white);font-size:1rem;font-family:inherit;
+  outline:none;transition:border-color .2s;}
+.search-bar input::placeholder{color:var(--muted);}
+.search-bar input:focus{border-color:rgba(251,191,36,.5);background:rgba(255,255,255,.1);}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1.1rem;pointer-events:none;}
+
+/* ── CATEGORY FILTER ── */
+.cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.cat{padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.05);color:var(--muted);font-size:.88rem;font-weight:600;
+  cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit;}
+.cat:active{transform:scale(.95);}
+.cat.on{border-color:transparent;color:#000;}
+.cat[data-c="all"].on{background:linear-gradient(135deg,var(--gold),var(--pink));color:#000;}
+.cat[data-c="math"].on{background:var(--blue);color:#fff;}
+.cat[data-c="science"].on{background:var(--teal);color:#000;}
+.cat[data-c="language"].on{background:var(--pink);color:#fff;}
+.cat[data-c="social"].on{background:var(--orange);color:#fff;}
+.cat[data-c="art"].on{background:var(--purple);color:#fff;}
+
+/* ── SECTION LABEL ── */
+.sec-label{color:var(--muted);font-size:.8rem;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.sec-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+
+/* ── CARD GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+
+/* ── GAME CARD ── */
+.card{background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:20px;
+  overflow:hidden;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;
+  position:relative;}
+.card:active{transform:scale(.97);}
+.card:hover{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.09);}
+
+.card-thumb{height:120px;display:flex;align-items:center;justify-content:center;
+  font-size:3.2rem;position:relative;overflow:hidden;flex-shrink:0;}
+.card-thumb::before{content:'';position:absolute;inset:0;opacity:.85;}
+
+/* per-category thumb colors */
+.card[data-c="math"] .card-thumb::before{background:linear-gradient(135deg,#1e3a8a,#1d4ed8);}
+.card[data-c="science"] .card-thumb::before{background:linear-gradient(135deg,#064e3b,#059669);}
+.card[data-c="language"] .card-thumb::before{background:linear-gradient(135deg,#831843,#db2777);}
+.card[data-c="social"] .card-thumb::before{background:linear-gradient(135deg,#7c2d12,#ea580c);}
+.card[data-c="art"] .card-thumb::before{background:linear-gradient(135deg,#4c1d95,#7c3aed);}
+
+.card-thumb-ico{position:relative;z-index:1;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.4));line-height:1;}
+.card-badge{position:absolute;top:10px;right:10px;z-index:2;
+  padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;}
+.badge-new{background:var(--gold);color:#000;}
+.badge-hot{background:var(--red);color:#fff;}
+
+.card-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:6px;}
+.card-tag{display:flex;align-items:center;gap:6px;}
+.tag{padding:2px 10px;border-radius:999px;font-size:.72rem;font-weight:700;}
+.tag-math{background:rgba(96,165,250,.2);color:var(--blue);}
+.tag-science{background:rgba(52,211,153,.2);color:var(--teal);}
+.tag-language{background:rgba(244,114,182,.2);color:var(--pink);}
+.tag-social{background:rgba(251,146,60,.2);color:var(--orange);}
+.tag-art{background:rgba(167,139,250,.2);color:var(--purple);}
+
+.card-title{font-size:1.05rem;font-weight:700;color:var(--white);line-height:1.3;}
+.card-desc{font-size:.83rem;color:var(--muted);line-height:1.6;flex:1;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;
+  margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);}
+.card-diff{display:flex;gap:2px;font-size:.78rem;}
+.card-play{padding:7px 16px;border-radius:999px;border:none;
+  font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:all .15s;color:#000;}
+.card[data-c="math"] .card-play{background:linear-gradient(135deg,#60a5fa,#3b82f6);}
+.card[data-c="science"] .card-play{background:linear-gradient(135deg,#34d399,#10b981);}
+.card[data-c="language"] .card-play{background:linear-gradient(135deg,#f472b6,#ec4899);}
+.card[data-c="social"] .card-play{background:linear-gradient(135deg,#fb923c,#f97316);}
+.card[data-c="art"] .card-play{background:linear-gradient(135deg,#a78bfa,#8b5cf6);}
+.card-play:active{transform:scale(.94);}
+
+/* hidden card */
+.card.hidden{display:none;}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-ico{font-size:3rem;margin-bottom:12px;display:block;}
+
+/* ── ADD BUTTON ── */
+.add-wrap{text-align:center;margin-top:28px;}
+.btn-add{padding:13px 28px;background:rgba(255,255,255,.07);
+  border:1.5px dashed rgba(255,255,255,.25);border-radius:14px;
+  color:var(--muted);font-size:.95rem;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:all .2s;}
+.btn-add:hover{background:rgba(255,255,255,.11);color:var(--white);
+  border-color:rgba(255,255,255,.4);}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.75);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-bg.on{opacity:1;pointer-events:all;}
+.modal{background:#111827;border:1.5px solid rgba(255,255,255,.14);
+  border-radius:22px;padding:28px;width:min(480px,100%);
+  transform:translateY(20px);transition:transform .2s;}
+.modal-bg.on .modal{transform:translateY(0);}
+.modal h2{font-size:1.3rem;font-weight:700;margin-bottom:20px;color:var(--white);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:6px;}
+.field input,.field textarea,.field select{
+  width:100%;padding:11px 14px;background:rgba(255,255,255,.08);
+  border:1.5px solid rgba(255,255,255,.14);border-radius:10px;
+  color:var(--white);font-size:.95rem;font-family:inherit;outline:none;transition:border-color .2s;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:rgba(251,191,36,.5);}
+.field textarea{resize:vertical;min-height:72px;}
+.field select option{background:#111827;}
+.modal-btns{display:flex;gap:10px;margin-top:20px;}
+.mbtn{flex:1;padding:12px;border:none;border-radius:11px;font-size:.95rem;
+  font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
+.mbtn-cancel{background:rgba(255,255,255,.08);color:var(--muted);}
+.mbtn-save{background:linear-gradient(135deg,var(--gold),#f59e0b);color:#000;}
+.mbtn:active{transform:scale(.97);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:#1f2937;border:1px solid rgba(52,211,153,.4);border-radius:12px;
+  padding:12px 22px;color:var(--teal);font-weight:600;font-size:.9rem;
+  z-index:200;transition:transform .3s;pointer-events:none;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- COSMIC BG -->
+<div class="cosmos"><div class="star-field" id="stars"></div></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <span class="hdr-rocket">🚀</span>
+    <div class="hdr-logo">BamBam<br>Learning Universe</div>
+    <div class="hdr-sub">เลือกกิจกรรม · เรียนรู้ · สนุกได้เลย! 🌟</div>
+    <div class="hdr-stats">
+      <div class="stat-pill">🎮 กิจกรรมทั้งหมด <span id="totalCount">0</span> รายการ</div>
+      <div class="stat-pill">📚 หมวดหมู่ <span id="catCount">0</span> หมวด</div>
+    </div>
+  </header>
+
+  <!-- SEARCH -->
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="ค้นหากิจกรรม..." autocomplete="off">
+  </div>
+
+  <!-- CATEGORY FILTER -->
+  <div class="cats" id="catBar">
+    <button class="cat on" data-c="all">🌈 ทั้งหมด</button>
+    <button class="cat" data-c="math">🔢 คณิตศาสตร์</button>
+    <button class="cat" data-c="science">🔬 วิทยาศาสตร์</button>
+    <button class="cat" data-c="language">📖 ภาษา</button>
+    <button class="cat" data-c="social">🌍 สังคม</button>
+    <button class="cat" data-c="art">🎨 ศิลปะ</button>
+  </div>
+
+  <!-- CARD GRID -->
+  <div class="sec-label" id="secLabel">กิจกรรมทั้งหมด</div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">
+    <span class="empty-ico">🔭</span>
+    ไม่พบกิจกรรมที่ค้นหา ลองเปลี่ยนคำค้นหาดูนะ
+  </div>
+
+  <!-- ADD BUTTON -->
+  <div class="add-wrap">
+    <button class="btn-add" onclick="openModal()">✦ เพิ่มกิจกรรมใหม่</button>
+  </div>
+
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h2>✦ เพิ่มกิจกรรมใหม่</h2>
+    <div class="field">
+      <label>ชื่อกิจกรรม *</label>
+      <input id="f-title" type="text" placeholder="เช่น One Piece Math Adventure">
+    </div>
+    <div class="field">
+      <label>คำอธิบายสั้นๆ</label>
+      <textarea id="f-desc" placeholder="เช่น ฝึกคณิตศาสตร์ผ่านการผจญภัยของลูฟี่"></textarea>
+    </div>
+    <div class="field">
+      <label>ลิงก์ URL *</label>
+      <input id="f-url" type="url" placeholder="https://...">
+    </div>
+    <div class="field">
+      <label>ไอคอน (emoji)</label>
+      <input id="f-icon" type="text" placeholder="🧮" maxlength="4" style="width:80px;">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field">
+        <label>อายุที่เหมาะสม</label>
+        <input id="f-age" type="text" placeholder="เช่น 6+ หรือ 8-12">
+      </div>
+      <div class="field" style="display:flex;align-items:flex-end;">
+        <small style="color:var(--muted);font-size:.75rem;padding-bottom:4px;">เช่น 6+ / 8+ / 10-14</small>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field">
+        <label>หมวดหมู่</label>
+        <select id="f-cat">
+          <option value="math">🔢 คณิตศาสตร์</option>
+          <option value="science">🔬 วิทยาศาสตร์</option>
+          <option value="language">📖 ภาษา</option>
+          <option value="social">🌍 สังคม</option>
+          <option value="art">🎨 ศิลปะ</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>ระดับความยาก</label>
+        <select id="f-diff">
+          <option value="1">⭐ ง่าย</option>
+          <option value="2">⭐⭐ ปานกลาง</option>
+          <option value="3">⭐⭐⭐ ยาก</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>ป้าย (badge)</label>
+      <select id="f-badge">
+        <option value="">ไม่มี</option>
+        <option value="new">✨ ใหม่</option>
+        <option value="hot">🔥 ยอดนิยม</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn mbtn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="mbtn mbtn-save" onclick="saveGame()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ เพิ่มกิจกรรมสำเร็จแล้ว!</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  GAME DATA — แก้ไขหรือเพิ่มตรงนี้ได้เลย
+// ═══════════════════════════════════════════
+const GAMES = [
+  {
+    id: 1,
+    title: 'Harry Potter: Math Adventure',
+    desc: 'ฝึกคณิตศาสตร์พื้นฐานสุดสนุก! ผ่านเวทมนต์และการผจญภัย',
+    url: 'https://ppeeradet.github.io/MagicMath01/',
+    icon: '⚡',
+    cat: 'math',
+    diff: 1,
+    badge: 'hot',
+    age: '6+'
+  },
+  {
+    id: 2,
+    title: 'One Piece: East Blue Math',
+    desc: 'ผจญภัยกับลูฟี่ผ่านอีสต์บลู 7 ด่าน! บวกลบคูณหาร 3-5 หลัก พร้อมเรื่องราวภาษาไทย',
+    url: 'https://ppeeradet.github.io/One_Piece_East_Blue_Ace/',
+    icon: '🏴‍☠️',
+    cat: 'math',
+    diff: 2,
+    badge: 'new',
+    age: '7+'
+  }
+];
+
+let activeCat = 'all';
+let searchTerm = '';
+let nextId = 10;
+
+// ═══════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════
+function loadExtra() {
+  try {
+    const e = JSON.parse(localStorage.getItem('bb_games') || '[]');
+    e.forEach(g => { if(!GAMES.find(x=>x.id===g.id)) GAMES.push(g); });
+  } catch(_) {}
+}
+function saveExtra() {
+  try {
+    const extra = GAMES.filter(g => g.id >= 10);
+    localStorage.setItem('bb_games', JSON.stringify(extra));
+  } catch(_) {}
+}
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+const CAT_LABELS = {math:'คณิตศาสตร์',science:'วิทยาศาสตร์',language:'ภาษา',social:'สังคม',art:'ศิลปะ'};
+
+function diffStars(d) {
+  const n = parseInt(d) || 1;
+  return '⭐'.repeat(n) + '☆'.repeat(3-n);
+}
+
+function matchSearch(g) {
+  if(!searchTerm) return true;
+  const q = searchTerm.toLowerCase();
+  return g.title.toLowerCase().includes(q) || g.desc.toLowerCase().includes(q);
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  let shown = 0;
+
+  const filtered = GAMES.filter(g =>
+    (activeCat === 'all' || g.cat === activeCat) && matchSearch(g)
+  );
+
+  filtered.forEach(g => {
+    shown++;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.c = g.cat;
+    card.onclick = () => window.open(g.url, '_blank');
+
+    const badge = g.badge === 'new'
+      ? `<span class="card-badge badge-new">✨ ใหม่</span>`
+      : g.badge === 'hot'
+      ? `<span class="card-badge badge-hot">🔥 Hot</span>`
+      : '';
+
+    card.innerHTML = `
+      <div class="card-thumb">
+        ${badge}
+        <span class="card-thumb-ico">${g.icon || '📚'}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-tag">
+          <span class="tag tag-${g.cat}">${CAT_LABELS[g.cat] || g.cat}</span>
+          ${g.age ? `<span style="font-size:.7rem;color:var(--muted);">👧 อายุ ${g.age}</span>` : ''}
+        </div>
+        <div class="card-title">${g.title}</div>
+        <div class="card-desc">${g.desc}</div>
+        <div class="card-footer">
+          <div class="card-diff">${diffStars(g.diff)}</div>
+          <button class="card-play" onclick="event.stopPropagation();window.open('${g.url}','_blank')">▶ เล่นเลย!</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  const empty = document.getElementById('empty');
+  empty.style.display = shown === 0 ? 'block' : 'none';
+
+  // update sec label
+  const lbl = activeCat === 'all' ? 'กิจกรรมทั้งหมด' : CAT_LABELS[activeCat];
+  document.getElementById('secLabel').textContent = lbl + ` (${shown})`;
+
+  // update stats
+  document.getElementById('totalCount').textContent = GAMES.length;
+  const cats = [...new Set(GAMES.map(g=>g.cat))];
+  document.getElementById('catCount').textContent = cats.length;
+}
+
+// ═══════════════════════════════════════════
+//  FILTER & SEARCH
+// ═══════════════════════════════════════════
+document.getElementById('catBar').addEventListener('click', e => {
+  const btn = e.target.closest('.cat');
+  if(!btn) return;
+  document.querySelectorAll('.cat').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  activeCat = btn.dataset.c;
+  renderGrid();
+});
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value.trim();
+  renderGrid();
+});
+
+// ═══════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════
+function openModal() {
+  document.getElementById('modal').classList.add('on');
+  document.getElementById('f-title').focus();
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('on');
+  ['f-title','f-desc','f-url','f-icon','f-age'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-badge').value='';
+  document.getElementById('f-diff').value='1';
+  document.getElementById('f-cat').value='math';
+}
+document.getElementById('modal').addEventListener('click', e => {
+  if(e.target === document.getElementById('modal')) closeModal();
+});
+
+function saveGame() {
+  const title = document.getElementById('f-title').value.trim();
+  const url = document.getElementById('f-url').value.trim();
+  if(!title || !url) { alert('กรุณากรอกชื่อและลิงก์ URL'); return; }
+  
+  GAMES.push({
+    id: nextId++,
+    title,
+    desc: document.getElementById('f-desc').value.trim() || 'กิจกรรมการเรียนรู้',
+    url,
+    icon: document.getElementById('f-icon').value.trim() || '📚',
+    cat: document.getElementById('f-cat').value,
+    diff: parseInt(document.getElementById('f-diff').value),
+    badge: document.getElementById('f-badge').value,
+    age: document.getElementById('f-age').value.trim() || '',
+  });
+  saveExtra();
+  closeModal();
+  renderGrid();
+  showToast('✅ เพิ่มกิจกรรมสำเร็จแล้ว!');
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  setTimeout(() => t.classList.remove('on'), 2500);
+}
+
+// ═══════════════════════════════════════════
+//  STARS BG
+// ═══════════════════════════════════════════
+function makeStars() {
+  const sf = document.getElementById('stars');
+  let html = '';
+  for(let i=0;i<120;i++){
+    const s = (Math.random()*2+0.5).toFixed(1);
+    const x = (Math.random()*100).toFixed(1);
+    const y = (Math.random()*100).toFixed(1);
+    const d = (Math.random()*5).toFixed(1);
+    const dur = (2+Math.random()*4).toFixed(1);
+    html += `<div style="position:absolute;width:${s}px;height:${s}px;left:${x}%;top:${y}%;
+      background:#fff;border-radius:50%;opacity:0.15;
+      animation:twk ${dur}s ${d}s ease-in-out infinite;"></div>`;
+  }
+  sf.innerHTML = html;
+}
+// add keyframes dynamically
+const ks = document.createElement('style');
+ks.textContent='@keyframes twk{0%,100%{opacity:.08}50%{opacity:.7}}';
+document.head.appendChild(ks);
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+loadExtra();
+makeStars();
+renderGrid();
+</script>
+</body>
+</html>
