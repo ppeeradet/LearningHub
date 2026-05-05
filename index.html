@@ -190,6 +190,55 @@ html,body{width:100%;min-height:100%;background:var(--bg);
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px;}
+
+/* ── EMOJI PICKER ── */
+.emoji-preview{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.emoji-preview-ico{font-size:2.4rem;width:52px;height:52px;display:flex;align-items:center;
+  justify-content:center;background:rgba(255,255,255,.08);border-radius:12px;
+  border:1.5px solid rgba(255,255,255,.14);flex-shrink:0;}
+.emoji-preview input{flex:1;padding:10px 12px;background:rgba(255,255,255,.08);
+  border:1.5px solid rgba(255,255,255,.14);border-radius:10px;
+  color:var(--white);font-size:1.2rem;font-family:inherit;outline:none;
+  text-align:center;width:70px;}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;
+  background:rgba(0,0,0,.25);border-radius:12px;padding:10px;
+  max-height:180px;overflow-y:auto;}
+.emoji-grid button{background:none;border:none;font-size:1.4rem;
+  cursor:pointer;border-radius:8px;padding:4px;transition:background .15s;line-height:1;}
+.emoji-grid button:hover{background:rgba(255,255,255,.15);}
+.emoji-grid button.picked{background:rgba(251,191,36,.3);outline:2px solid var(--gold);}
+.emoji-sec-label{font-size:.7rem;color:var(--muted);letter-spacing:1px;
+  text-transform:uppercase;padding:6px 2px 2px;grid-column:1/-1;}
+
+/* ── CARD ACTIONS ── */
+.card-actions{position:absolute;top:8px;left:8px;z-index:3;
+  display:flex;gap:5px;opacity:0;transition:opacity .2s;}
+.card:hover .card-actions{opacity:1;}
+.card-action-btn{padding:5px 9px;border:none;border-radius:8px;
+  font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:all .15s;backdrop-filter:blur(6px);}
+.btn-edit{background:rgba(96,165,250,.85);color:#fff;}
+.btn-del{background:rgba(248,113,113,.85);color:#fff;}
+.card-action-btn:active{transform:scale(.93);}
+
+/* ── DELETE CONFIRM ── */
+.del-modal-bg{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.8);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .2s;}
+.del-modal-bg.on{opacity:1;pointer-events:all;}
+.del-modal{background:#1f1035;border:1.5px solid rgba(248,113,113,.4);
+  border-radius:20px;padding:28px 24px;text-align:center;width:min(340px,100%);
+  transform:scale(.9);transition:transform .2s;}
+.del-modal-bg.on .del-modal{transform:scale(1);}
+.del-ico{font-size:2.8rem;margin-bottom:10px;}
+.del-title{color:var(--white);font-size:1.1rem;font-weight:700;margin-bottom:6px;}
+.del-sub{color:var(--muted);font-size:.88rem;margin-bottom:22px;line-height:1.5;}
+.del-btns{display:flex;gap:10px;}
+.del-btns button{flex:1;padding:12px;border:none;border-radius:11px;font-size:.95rem;
+  font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-del-cancel{background:rgba(255,255,255,.1);color:var(--muted);}
+.btn-del-confirm{background:linear-gradient(135deg,#f87171,#ef4444);color:#fff;}
+.del-btns button:active{transform:scale(.97);}
 </style>
 </head>
 <body>
@@ -244,7 +293,8 @@ html,body{width:100%;min-height:100%;background:var(--bg);
 <!-- ADD MODAL -->
 <div class="modal-bg" id="modal">
   <div class="modal">
-    <h2>✦ เพิ่มกิจกรรมใหม่</h2>
+    <h2 id="modalTitle">✦ เพิ่มกิจกรรมใหม่</h2>
+    <input type="hidden" id="f-editid" value="">
     <div class="field">
       <label>ชื่อกิจกรรม *</label>
       <input id="f-title" type="text" placeholder="เช่น One Piece Math Adventure">
@@ -259,7 +309,12 @@ html,body{width:100%;min-height:100%;background:var(--bg);
     </div>
     <div class="field">
       <label>ไอคอน (emoji)</label>
-      <input id="f-icon" type="text" placeholder="🧮" maxlength="4" style="width:80px;">
+      <div class="emoji-preview">
+        <div class="emoji-preview-ico" id="emojiPreview">📚</div>
+        <input id="f-icon" type="text" placeholder="📚" maxlength="4" style="width:70px;text-align:center;" oninput="syncEmojiPreview()">
+        <span style="color:var(--muted);font-size:.8rem;">← พิมพ์เองหรือเลือกด้านล่าง</span>
+      </div>
+      <div class="emoji-grid" id="emojiGrid"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div class="field">
@@ -310,12 +365,25 @@ html,body{width:100%;min-height:100%;background:var(--bg);
   </div>
 </div>
 
+<!-- DELETE CONFIRM -->
+<div class="del-modal-bg" id="delModal">
+  <div class="del-modal">
+    <div class="del-ico">🗑️</div>
+    <div class="del-title">ลบกิจกรรมนี้?</div>
+    <div class="del-sub" id="delSub">คุณแน่ใจหรือไม่ว่าต้องการลบ?<br>ไม่สามารถกู้คืนได้</div>
+    <div class="del-btns">
+      <button class="btn-del-cancel" onclick="closeDelModal()">ยกเลิก</button>
+      <button class="btn-del-confirm" onclick="confirmDelete()">🗑️ ลบเลย</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast">✅ เพิ่มกิจกรรมสำเร็จแล้ว!</div>
 
 <script>
 // ═══════════════════════════════════════════
-//  GAME DATA — แก้ไขหรือเพิ่มตรงนี้ได้เลย
+//  GAME DATA
 // ═══════════════════════════════════════════
 const GAMES = [
   {
@@ -345,6 +413,18 @@ const GAMES = [
 let activeCat = 'all';
 let searchTerm = '';
 let nextId = 10;
+let pendingDeleteId = null;
+
+// ═══════════════════════════════════════════
+//  EMOJI DATA
+// ═══════════════════════════════════════════
+const EMOJI_SECTIONS = [
+  { label: '🔢 คณิต & วิทย์', emojis: ['🔢','🧮','➕','➖','✖️','➗','📐','📏','🔬','🧪','⚗️','🔭','🧬','🧫','💡','🔋','⚡','🧲','🌡️','🔩'] },
+  { label: '📚 ภาษา & ศิลปะ', emojis: ['📖','📚','📝','✏️','🖊️','🖋️','💬','🗣️','🔤','🅰️','🎨','🎭','🎬','🎵','🎸','🎹','🥁','🎷','🎺','🖼️'] },
+  { label: '🌍 โลก & ธรรมชาติ', emojis: ['🌍','🌎','🌏','🌊','🌋','🏔️','🌿','🍀','🌺','🦁','🐬','🦋','🐉','🦅','🌙','☀️','⭐','🌈','🌸','🍃'] },
+  { label: '🚀 ผจญภัย & เกม', emojis: ['🚀','🏴‍☠️','⚡','🧙‍♀️','🧙‍♂️','🏰','🗡️','🛡️','🎮','🎲','🎯','🧩','🏆','🥇','💎','👑','🔮','🗺️','⚓','🎪'] },
+  { label: '🌌 อวกาศ & เทคโน', emojis: ['🌌','🪐','🛸','🌠','💫','🌟','🤖','💻','📱','⌨️','🖥️','🛰️','🔭','👾','🕹️','📡','🔑','🧭','⚙️','🔐'] },
+];
 
 // ═══════════════════════════════════════════
 //  STORAGE
@@ -353,25 +433,81 @@ function loadExtra() {
   try {
     const e = JSON.parse(localStorage.getItem('bb_games') || '[]');
     e.forEach(g => { if(!GAMES.find(x=>x.id===g.id)) GAMES.push(g); });
+    // sync nextId
+    const maxId = Math.max(...GAMES.map(g=>g.id), 9);
+    nextId = maxId + 1;
   } catch(_) {}
 }
-function saveExtra() {
+function saveAll() {
   try {
-    const extra = GAMES.filter(g => g.id >= 10);
-    localStorage.setItem('bb_games', JSON.stringify(extra));
+    // save all games including built-in (so edits persist)
+    localStorage.setItem('bb_games_all', JSON.stringify(GAMES));
   } catch(_) {}
+}
+function loadAll() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('bb_games_all') || 'null');
+    if(saved && saved.length) {
+      GAMES.length = 0;
+      saved.forEach(g => GAMES.push(g));
+      nextId = Math.max(...GAMES.map(g=>g.id), 9) + 1;
+      return true;
+    }
+  } catch(_) {}
+  return false;
+}
+
+// ═══════════════════════════════════════════
+//  EMOJI PICKER
+// ═══════════════════════════════════════════
+function buildEmojiGrid() {
+  const grid = document.getElementById('emojiGrid');
+  if(!grid) return;
+  let html = '';
+  EMOJI_SECTIONS.forEach(sec => {
+    html += `<div class="emoji-sec-label">${sec.label}</div>`;
+    sec.emojis.forEach(e => {
+      html += `<button type="button" onclick="pickEmoji('${e}')" title="${e}">${e}</button>`;
+    });
+  });
+  grid.innerHTML = html;
+}
+
+function pickEmoji(e) {
+  document.getElementById('f-icon').value = e;
+  document.getElementById('emojiPreview').textContent = e;
+  // highlight picked
+  document.querySelectorAll('.emoji-grid button').forEach(b => {
+    b.classList.toggle('picked', b.textContent.trim() === e);
+  });
+}
+
+function syncEmojiPreview() {
+  const v = document.getElementById('f-icon').value.trim();
+  document.getElementById('emojiPreview').textContent = v || '📚';
+  document.querySelectorAll('.emoji-grid button').forEach(b => {
+    b.classList.toggle('picked', b.textContent.trim() === v);
+  });
 }
 
 // ═══════════════════════════════════════════
 //  RENDER
 // ═══════════════════════════════════════════
 const CAT_LABELS = {math:'คณิตศาสตร์',science:'วิทยาศาสตร์',language:'ภาษา',social:'สังคม',art:'ศิลปะ'};
+const BADGE_MAP = {
+  new:  ['badge-new',  '✨ ใหม่'],
+  hot:  ['badge-hot',  '🔥 ยอดนิยม'],
+  go:   ['badge-go',   '🚀 ไปลองกันเถอะ'],
+  fun:  ['badge-fun',  '🎉 สนุกสุด!'],
+  easy: ['badge-easy', '😊 เริ่มต้นง่าย'],
+  hard: ['badge-hard', '💪 ท้าทาย'],
+  rec:  ['badge-rec',  '⭐ แนะนำ'],
+};
 
 function diffStars(d) {
   const n = parseInt(d) || 1;
   return '⭐'.repeat(n) + '☆'.repeat(3-n);
 }
-
 function matchSearch(g) {
   if(!searchTerm) return true;
   const q = searchTerm.toLowerCase();
@@ -394,21 +530,17 @@ function renderGrid() {
     card.dataset.c = g.cat;
     card.onclick = () => window.open(g.url, '_blank');
 
-    const BADGE_MAP = {
-      new:  ['badge-new',  '✨ ใหม่'],
-      hot:  ['badge-hot',  '🔥 ยอดนิยม'],
-      go:   ['badge-go',   '🚀 ไปลองกันเถอะ'],
-      fun:  ['badge-fun',  '🎉 สนุกสุด!'],
-      easy: ['badge-easy', '😊 เริ่มต้นง่าย'],
-      hard: ['badge-hard', '💪 ท้าทาย'],
-      rec:  ['badge-rec',  '⭐ แนะนำ'],
-    };
     const bInfo = g.badge && BADGE_MAP[g.badge];
-    const badge = bInfo
-      ? `<span class="card-badge ${bInfo[0]}">${bInfo[1]}</span>`
-      : '';
+    const badge = bInfo ? `<span class="card-badge ${bInfo[0]}">${bInfo[1]}</span>` : '';
+
+    // safe url for inline onclick
+    const safeUrl = g.url.replace(/'/g, "\\'");
 
     card.innerHTML = `
+      <div class="card-actions">
+        <button class="card-action-btn btn-edit" onclick="event.stopPropagation();openModal(${g.id})">✏️ แก้ไข</button>
+        <button class="card-action-btn btn-del" onclick="event.stopPropagation();openDelModal(${g.id})">🗑️</button>
+      </div>
       <div class="card-thumb">
         ${badge}
         <span class="card-thumb-ico">${g.icon || '📚'}</span>
@@ -422,7 +554,7 @@ function renderGrid() {
         <div class="card-desc">${g.desc}</div>
         <div class="card-footer">
           <div class="card-diff">${diffStars(g.diff)}</div>
-          <button class="card-play" onclick="event.stopPropagation();window.open('${g.url}','_blank')">▶ เล่นเลย!</button>
+          <button class="card-play" onclick="event.stopPropagation();window.open('${safeUrl}','_blank')">▶ เล่นเลย!</button>
         </div>
       </div>`;
     grid.appendChild(card);
@@ -431,11 +563,8 @@ function renderGrid() {
   const empty = document.getElementById('empty');
   empty.style.display = shown === 0 ? 'block' : 'none';
 
-  // update sec label
   const lbl = activeCat === 'all' ? 'กิจกรรมทั้งหมด' : CAT_LABELS[activeCat];
   document.getElementById('secLabel').textContent = lbl + ` (${shown})`;
-
-  // update stats
   document.getElementById('totalCount').textContent = GAMES.length;
   const cats = [...new Set(GAMES.map(g=>g.cat))];
   document.getElementById('catCount').textContent = cats.length;
@@ -459,19 +588,55 @@ document.getElementById('searchInput').addEventListener('input', e => {
 });
 
 // ═══════════════════════════════════════════
-//  MODAL
+//  MODAL — ADD / EDIT
 // ═══════════════════════════════════════════
-function openModal() {
+function openModal(editId) {
+  const isEdit = editId !== undefined;
+  document.getElementById('modalTitle').textContent = isEdit ? '✏️ แก้ไขกิจกรรม' : '✦ เพิ่มกิจกรรมใหม่';
+  document.getElementById('f-editid').value = isEdit ? editId : '';
+
+  if(isEdit) {
+    const g = GAMES.find(x => x.id === editId);
+    if(!g) return;
+    document.getElementById('f-title').value = g.title;
+    document.getElementById('f-desc').value = g.desc;
+    document.getElementById('f-url').value = g.url;
+    document.getElementById('f-icon').value = g.icon || '📚';
+    document.getElementById('emojiPreview').textContent = g.icon || '📚';
+    document.getElementById('f-age').value = g.age || '';
+    document.getElementById('f-cat').value = g.cat;
+    document.getElementById('f-diff').value = g.diff || 1;
+    document.getElementById('f-badge').value = g.badge || '';
+    // highlight in picker
+    setTimeout(() => {
+      document.querySelectorAll('.emoji-grid button').forEach(b => {
+        b.classList.toggle('picked', b.textContent.trim() === g.icon);
+      });
+    }, 50);
+  } else {
+    resetModal();
+  }
+
   document.getElementById('modal').classList.add('on');
   document.getElementById('f-title').focus();
 }
-function closeModal() {
-  document.getElementById('modal').classList.remove('on');
-  ['f-title','f-desc','f-url','f-icon','f-age'].forEach(id => document.getElementById(id).value='');
+
+function resetModal() {
+  ['f-title','f-desc','f-url','f-age'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-icon').value = '📚';
+  document.getElementById('emojiPreview').textContent = '📚';
   document.getElementById('f-badge').value='';
   document.getElementById('f-diff').value='1';
   document.getElementById('f-cat').value='math';
+  document.getElementById('f-editid').value='';
+  document.querySelectorAll('.emoji-grid button').forEach(b=>b.classList.remove('picked'));
 }
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('on');
+  resetModal();
+}
+
 document.getElementById('modal').addEventListener('click', e => {
   if(e.target === document.getElementById('modal')) closeModal();
 });
@@ -480,9 +645,9 @@ function saveGame() {
   const title = document.getElementById('f-title').value.trim();
   const url = document.getElementById('f-url').value.trim();
   if(!title || !url) { alert('กรุณากรอกชื่อและลิงก์ URL'); return; }
-  
-  GAMES.push({
-    id: nextId++,
+
+  const editId = document.getElementById('f-editid').value;
+  const data = {
     title,
     desc: document.getElementById('f-desc').value.trim() || 'กิจกรรมการเรียนรู้',
     url,
@@ -491,12 +656,48 @@ function saveGame() {
     diff: parseInt(document.getElementById('f-diff').value),
     badge: document.getElementById('f-badge').value,
     age: document.getElementById('f-age').value.trim() || '',
-  });
-  saveExtra();
+  };
+
+  if(editId) {
+    const idx = GAMES.findIndex(g => g.id === parseInt(editId));
+    if(idx > -1) Object.assign(GAMES[idx], data);
+    showToast('✅ แก้ไขเรียบร้อยแล้ว!');
+  } else {
+    GAMES.push({ id: nextId++, ...data });
+    showToast('✅ เพิ่มกิจกรรมสำเร็จแล้ว!');
+  }
+
+  saveAll();
   closeModal();
   renderGrid();
-  showToast('✅ เพิ่มกิจกรรมสำเร็จแล้ว!');
 }
+
+// ═══════════════════════════════════════════
+//  DELETE
+// ═══════════════════════════════════════════
+function openDelModal(id) {
+  pendingDeleteId = id;
+  const g = GAMES.find(x => x.id === id);
+  document.getElementById('delSub').innerHTML =
+    `ลบ "<strong style="color:var(--white)">${g ? g.title : ''}</strong>" ออกจากรายการ?<br><span style="color:var(--red);font-size:.8rem;">ไม่สามารถกู้คืนได้</span>`;
+  document.getElementById('delModal').classList.add('on');
+}
+function closeDelModal() {
+  pendingDeleteId = null;
+  document.getElementById('delModal').classList.remove('on');
+}
+function confirmDelete() {
+  if(pendingDeleteId === null) return;
+  const idx = GAMES.findIndex(g => g.id === pendingDeleteId);
+  if(idx > -1) GAMES.splice(idx, 1);
+  saveAll();
+  closeDelModal();
+  renderGrid();
+  showToast('🗑️ ลบกิจกรรมแล้ว');
+}
+document.getElementById('delModal').addEventListener('click', e => {
+  if(e.target === document.getElementById('delModal')) closeDelModal();
+});
 
 // ═══════════════════════════════════════════
 //  TOAST
@@ -526,7 +727,6 @@ function makeStars() {
   }
   sf.innerHTML = html;
 }
-// add keyframes dynamically
 const ks = document.createElement('style');
 ks.textContent='@keyframes twk{0%,100%{opacity:.08}50%{opacity:.7}}';
 document.head.appendChild(ks);
@@ -534,8 +734,9 @@ document.head.appendChild(ks);
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
-loadExtra();
+if(!loadAll()) loadExtra();
 makeStars();
+buildEmojiGrid();
 renderGrid();
 </script>
 </body>
