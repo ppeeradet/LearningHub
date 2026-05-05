@@ -108,6 +108,11 @@ html,body{width:100%;min-height:100%;background:var(--bg);
   letter-spacing:.5px;text-transform:uppercase;}
 .badge-new{background:var(--gold);color:#000;}
 .badge-hot{background:var(--red);color:#fff;}
+.badge-go{background:var(--teal);color:#000;}
+.badge-fun{background:var(--pink);color:#fff;}
+.badge-easy{background:#86efac;color:#14532d;}
+.badge-hard{background:var(--purple);color:#fff;}
+.badge-rec{background:var(--orange);color:#fff;}
 
 .card-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:6px;}
 .card-tag{display:flex;align-items:center;gap:6px;}
@@ -291,6 +296,11 @@ html,body{width:100%;min-height:100%;background:var(--bg);
         <option value="">ไม่มี</option>
         <option value="new">✨ ใหม่</option>
         <option value="hot">🔥 ยอดนิยม</option>
+        <option value="go">🚀 ไปลองกันเถอะ</option>
+        <option value="fun">🎉 สนุกสุด!</option>
+        <option value="easy">😊 เริ่มต้นง่าย</option>
+        <option value="hard">💪 ท้าทาย</option>
+        <option value="rec">⭐ แนะนำ</option>
       </select>
     </div>
     <div class="modal-btns">
@@ -384,10 +394,18 @@ function renderGrid() {
     card.dataset.c = g.cat;
     card.onclick = () => window.open(g.url, '_blank');
 
-    const badge = g.badge === 'new'
-      ? `<span class="card-badge badge-new">✨ ใหม่</span>`
-      : g.badge === 'hot'
-      ? `<span class="card-badge badge-hot">🔥 Hot</span>`
+    const BADGE_MAP = {
+      new:  ['badge-new',  '✨ ใหม่'],
+      hot:  ['badge-hot',  '🔥 ยอดนิยม'],
+      go:   ['badge-go',   '🚀 ไปลองกันเถอะ'],
+      fun:  ['badge-fun',  '🎉 สนุกสุด!'],
+      easy: ['badge-easy', '😊 เริ่มต้นง่าย'],
+      hard: ['badge-hard', '💪 ท้าทาย'],
+      rec:  ['badge-rec',  '⭐ แนะนำ'],
+    };
+    const bInfo = g.badge && BADGE_MAP[g.badge];
+    const badge = bInfo
+      ? `<span class="card-badge ${bInfo[0]}">${bInfo[1]}</span>`
       : '';
 
     card.innerHTML = `
