@@ -221,6 +221,35 @@ html,body{width:100%;min-height:100%;background:var(--bg);
 .btn-del{background:rgba(248,113,113,.85);color:#fff;}
 .card-action-btn:active{transform:scale(.93);}
 
+/* ── PASSWORD MODAL ── */
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.pw-modal-bg{position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.82);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .2s;}
+.pw-modal-bg.on{opacity:1;pointer-events:all;}
+.pw-modal{background:#0d1b2e;border:1.5px solid rgba(251,191,36,.35);
+  border-radius:22px;padding:32px 28px;text-align:center;width:min(340px,100%);
+  transform:scale(.9);transition:transform .2s;}
+.pw-modal-bg.on .pw-modal{transform:scale(1);}
+.pw-ico{font-size:2.5rem;margin-bottom:10px;}
+.pw-title{color:var(--white);font-size:1.15rem;font-weight:700;margin-bottom:6px;}
+.pw-sub{color:var(--muted);font-size:.85rem;margin-bottom:20px;}
+.pw-input-wrap{position:relative;margin-bottom:16px;}
+.pw-input{width:100%;padding:13px 44px 13px 16px;background:rgba(255,255,255,.08);
+  border:1.5px solid rgba(255,255,255,.18);border-radius:12px;
+  color:var(--white);font-size:1.1rem;font-family:inherit;outline:none;
+  text-align:center;letter-spacing:4px;transition:border-color .2s;}
+.pw-input:focus{border-color:rgba(251,191,36,.6);}
+.pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--muted);}
+.pw-error{color:var(--red);font-size:.82rem;margin-bottom:12px;min-height:18px;}
+.pw-btns{display:flex;gap:10px;}
+.pw-btns button{flex:1;padding:12px;border:none;border-radius:11px;font-size:.95rem;
+  font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
+.pw-cancel{background:rgba(255,255,255,.08);color:var(--muted);}
+.pw-confirm{background:linear-gradient(135deg,var(--gold),#f59e0b);color:#000;}
+.pw-btns button:active{transform:scale(.97);}
+
 /* ── DELETE CONFIRM ── */
 .del-modal-bg{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.8);
   display:flex;align-items:center;justify-content:center;padding:16px;
@@ -251,7 +280,7 @@ html,body{width:100%;min-height:100%;background:var(--bg);
   <!-- HEADER -->
   <header class="hdr">
     <span class="hdr-rocket">🚀</span>
-    <div class="hdr-logo">BamBam<br>Learning Universe</div>
+    <div class="hdr-logo">Learning Universe</div>
     <div class="hdr-sub">เลือกกิจกรรม · เรียนรู้ · สนุกได้เลย! 🌟</div>
     <div class="hdr-stats">
       <div class="stat-pill">🎮 กิจกรรมทั้งหมด <span id="totalCount">0</span> รายการ</div>
@@ -285,7 +314,7 @@ html,body{width:100%;min-height:100%;background:var(--bg);
 
   <!-- ADD BUTTON -->
   <div class="add-wrap">
-    <button class="btn-add" onclick="openModal()">✦ เพิ่มกิจกรรมใหม่</button>
+    <button class="btn-add" onclick="requirePw('เพิ่มกิจกรรมใหม่', () => openModal())">✦ เพิ่มกิจกรรมใหม่</button>
   </div>
 
 </div>
@@ -339,9 +368,11 @@ html,body{width:100%;min-height:100%;background:var(--bg);
       <div class="field">
         <label>ระดับความยาก</label>
         <select id="f-diff">
-          <option value="1">⭐ ง่าย</option>
-          <option value="2">⭐⭐ ปานกลาง</option>
-          <option value="3">⭐⭐⭐ ยาก</option>
+          <option value="1">⭐ ง่ายมาก</option>
+          <option value="2">⭐⭐ ง่าย</option>
+          <option value="3">⭐⭐⭐ ปานกลาง</option>
+          <option value="4">⭐⭐⭐⭐ ยาก</option>
+          <option value="5">⭐⭐⭐⭐⭐ ยากมาก</option>
         </select>
       </div>
     </div>
@@ -361,6 +392,25 @@ html,body{width:100%;min-height:100%;background:var(--bg);
     <div class="modal-btns">
       <button class="mbtn mbtn-cancel" onclick="closeModal()">ยกเลิก</button>
       <button class="mbtn mbtn-save" onclick="saveGame()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="pw-modal-bg" id="pwModal">
+  <div class="pw-modal">
+    <div class="pw-ico">🔐</div>
+    <div class="pw-title">ใส่รหัสผ่านก่อนนะ</div>
+    <div class="pw-sub" id="pwSub">สำหรับผู้ดูแลระบบเท่านั้น</div>
+    <div class="pw-input-wrap">
+      <input class="pw-input" id="pwInput" type="password" placeholder="• • • • •"
+        maxlength="10" autocomplete="off" onkeydown="if(event.key==='Enter')checkPw()">
+      <button class="pw-toggle" onclick="togglePwVis()" id="pwToggle">👁️</button>
+    </div>
+    <div class="pw-error" id="pwError"></div>
+    <div class="pw-btns">
+      <button class="pw-cancel" onclick="closePwModal()">ยกเลิก</button>
+      <button class="pw-confirm" onclick="checkPw()">🔓 เข้าสู่ระบบ</button>
     </div>
   </div>
 </div>
@@ -414,6 +464,162 @@ let activeCat = 'all';
 let searchTerm = '';
 let nextId = 10;
 let pendingDeleteId = null;
+
+// ═══════════════════════════════════════════
+//  PASSWORD GATE
+// ═══════════════════════════════════════════
+const PW = '47668';
+let pwUnlocked = false;
+let pwCallback = null; // function to call after unlock
+
+function requirePw(label, callback) {
+  if(pwUnlocked) { callback(); return; }
+  pwCallback = callback;
+  document.getElementById('pwSub').textContent = label;
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  document.getElementById('pwModal').classList.add('on');
+  setTimeout(() => document.getElementById('pwInput').focus(), 120);
+}
+
+function checkPw() {
+  const val = document.getElementById('pwInput').value;
+  if(val === PW) {
+    pwUnlocked = true;
+    document.getElementById('pwModal').classList.remove('on');
+    document.getElementById('pwError').textContent = '';
+    if(pwCallback) { pwCallback(); pwCallback = null; }
+  } else {
+    document.getElementById('pwError').textContent = '❌ รหัสผ่านไม่ถูกต้อง ลองใหม่อีกครั้ง';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+    // shake animation
+    const inp = document.getElementById('pwInput');
+    inp.style.animation = 'none';
+    setTimeout(() => { inp.style.animation = 'shake .35s ease'; }, 10);
+  }
+}
+
+function closePwModal() {
+  pwCallback = null;
+  document.getElementById('pwModal').classList.remove('on');
+  document.getElementById('pwError').textContent = '';
+}
+
+function togglePwVis() {
+  const inp = document.getElementById('pwInput');
+  const tog = document.getElementById('pwToggle');
+  if(inp.type === 'password') { inp.type = 'text'; tog.textContent = '🙈'; }
+  else { inp.type = 'password'; tog.textContent = '👁️'; }
+}
+
+document.getElementById('pwModal').addEventListener('click', e => {
+  if(e.target === document.getElementById('pwModal')) closePwModal();
+});
+
+// ═══════════════════════════════════════════
+//  FIRESTORE STORAGE
+// ═══════════════════════════════════════════
+const HUB_COL = 'hub_games';
+
+// Default built-in games (seeded to Firestore on first run)
+const DEFAULT_GAMES = [
+  { firestoreId: 'game_001', id: 1, title: 'Harry Potter: Math Adventure',
+    desc: 'ฝึกคณิตศาสตร์พื้นฐานสุดสนุก! ผ่านเวทมนต์และการผจญภัย',
+    url: 'https://ppeeradet.github.io/MagicMath01/',
+    icon: '⚡', cat: 'math', diff: 1, badge: 'hot', age: '6+', order: 1 },
+  { firestoreId: 'game_002', id: 2, title: 'One Piece: East Blue Math',
+    desc: 'ผจญภัยกับลูฟี่ผ่านอีสต์บลู 7 ด่าน! บวกลบคูณหาร 3-5 หลัก พร้อมเรื่องราวภาษาไทย',
+    url: 'https://ppeeradet.github.io/One_Piece_East_Blue_Ace/',
+    icon: '🏴‍☠️', cat: 'math', diff: 2, badge: 'new', age: '7+', order: 2 },
+];
+
+function showLoading(on) {
+  let el = document.getElementById('loadingBar');
+  if(!el) {
+    el = document.createElement('div');
+    el.id = 'loadingBar';
+    el.style.cssText = 'position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#fbbf24,#f472b6,#a78bfa);z-index:999;transition:opacity .3s;';
+    document.body.appendChild(el);
+  }
+  el.style.opacity = on ? '1' : '0';
+}
+
+async function loadFromFirestore() {
+  if(!db) { loadFromLocalFallback(); return; }
+  showLoading(true);
+  try {
+    const snap = await db.collection(HUB_COL).orderBy('order','asc').get();
+    if(snap.empty) {
+      // First time: seed default games
+      await seedDefaults();
+      GAMES.length = 0;
+      DEFAULT_GAMES.forEach(g => GAMES.push({...g}));
+    } else {
+      GAMES.length = 0;
+      snap.forEach(doc => {
+        const d = doc.data();
+        GAMES.push({ ...d, firestoreId: doc.id });
+      });
+    }
+    nextId = Math.max(...GAMES.map(g => g.id || 0), 9) + 1;
+  } catch(err) {
+    console.warn('Firestore load failed, using local fallback', err);
+    loadFromLocalFallback();
+  }
+  showLoading(false);
+  renderGrid();
+}
+
+async function seedDefaults() {
+  if(!db) return;
+  const batch = db.batch();
+  DEFAULT_GAMES.forEach(g => {
+    const ref = db.collection(HUB_COL).doc(g.firestoreId);
+    batch.set(ref, g);
+  });
+  await batch.commit();
+}
+
+function loadFromLocalFallback() {
+  GAMES.length = 0;
+  try {
+    const saved = JSON.parse(localStorage.getItem('bb_games_all') || 'null');
+    if(saved && saved.length) { saved.forEach(g => GAMES.push(g)); return; }
+  } catch(_) {}
+  DEFAULT_GAMES.forEach(g => GAMES.push({...g}));
+}
+
+function localBackup() {
+  try { localStorage.setItem('bb_games_all', JSON.stringify(GAMES)); } catch(_) {}
+}
+
+async function firestoreSave(data, firestoreId) {
+  if(!db) { localBackup(); return null; }
+  try {
+    if(firestoreId) {
+      await db.collection(HUB_COL).doc(firestoreId).set(data, { merge: true });
+      return firestoreId;
+    } else {
+      const ref = await db.collection(HUB_COL).add(data);
+      return ref.id;
+    }
+  } catch(err) {
+    console.warn('Firestore save failed', err);
+    localBackup();
+    return null;
+  }
+}
+
+async function firestoreDelete(firestoreId) {
+  if(!db || !firestoreId) { localBackup(); return; }
+  try {
+    await db.collection(HUB_COL).doc(firestoreId).delete();
+  } catch(err) {
+    console.warn('Firestore delete failed', err);
+    localBackup();
+  }
+}
 
 // ═══════════════════════════════════════════
 //  EMOJI DATA
@@ -506,7 +712,8 @@ const BADGE_MAP = {
 
 function diffStars(d) {
   const n = parseInt(d) || 1;
-  return '⭐'.repeat(n) + '☆'.repeat(3-n);
+  const labels = ['','ง่ายมาก','ง่าย','ปานกลาง','ยาก','ยากมาก'];
+  return '⭐'.repeat(n) + '☆'.repeat(5-n) + `<span style="font-size:.68rem;color:var(--muted);margin-left:4px;">${labels[n]||''}</span>`;
 }
 function matchSearch(g) {
   if(!searchTerm) return true;
@@ -538,8 +745,8 @@ function renderGrid() {
 
     card.innerHTML = `
       <div class="card-actions">
-        <button class="card-action-btn btn-edit" onclick="event.stopPropagation();openModal(${g.id})">✏️ แก้ไข</button>
-        <button class="card-action-btn btn-del" onclick="event.stopPropagation();openDelModal(${g.id})">🗑️</button>
+        <button class="card-action-btn btn-edit" onclick="event.stopPropagation();requirePw('แก้ไขกิจกรรม', () => openModal(${g.id}))">✏️ แก้ไข</button>
+        <button class="card-action-btn btn-del" onclick="event.stopPropagation();requirePw('ลบกิจกรรม', () => openDelModal(${g.id}))">🗑️</button>
       </div>
       <div class="card-thumb">
         ${badge}
@@ -641,12 +848,15 @@ document.getElementById('modal').addEventListener('click', e => {
   if(e.target === document.getElementById('modal')) closeModal();
 });
 
-function saveGame() {
+async function saveGame() {
   const title = document.getElementById('f-title').value.trim();
   const url = document.getElementById('f-url').value.trim();
   if(!title || !url) { alert('กรุณากรอกชื่อและลิงก์ URL'); return; }
 
   const editId = document.getElementById('f-editid').value;
+  const saveBtn = document.querySelector('.mbtn-save');
+  saveBtn.disabled = true; saveBtn.textContent = '⏳ กำลังบันทึก...';
+
   const data = {
     title,
     desc: document.getElementById('f-desc').value.trim() || 'กิจกรรมการเรียนรู้',
@@ -660,14 +870,22 @@ function saveGame() {
 
   if(editId) {
     const idx = GAMES.findIndex(g => g.id === parseInt(editId));
+    const existingFsId = idx > -1 ? GAMES[idx].firestoreId : null;
+    Object.assign(data, { id: parseInt(editId), order: idx > -1 ? (GAMES[idx].order || idx) : 99 });
+    await firestoreSave(data, existingFsId);
     if(idx > -1) Object.assign(GAMES[idx], data);
     showToast('✅ แก้ไขเรียบร้อยแล้ว!');
   } else {
-    GAMES.push({ id: nextId++, ...data });
-    showToast('✅ เพิ่มกิจกรรมสำเร็จแล้ว!');
+    const newId = nextId++;
+    const order = GAMES.length + 1;
+    Object.assign(data, { id: newId, order });
+    const fsId = await firestoreSave(data, null);
+    GAMES.push({ ...data, firestoreId: fsId });
+    showToast('✅ เพิ่มกิจกรรมสำเร็จแล้ว! ทุกเครื่องจะเห็นแล้ว 🌐');
   }
 
-  saveAll();
+  localBackup();
+  saveBtn.disabled = false; saveBtn.textContent = '💾 บันทึก';
   closeModal();
   renderGrid();
 }
@@ -686,11 +904,13 @@ function closeDelModal() {
   pendingDeleteId = null;
   document.getElementById('delModal').classList.remove('on');
 }
-function confirmDelete() {
+async function confirmDelete() {
   if(pendingDeleteId === null) return;
   const idx = GAMES.findIndex(g => g.id === pendingDeleteId);
+  const fsId = idx > -1 ? GAMES[idx].firestoreId : null;
+  await firestoreDelete(fsId);
   if(idx > -1) GAMES.splice(idx, 1);
-  saveAll();
+  localBackup();
   closeDelModal();
   renderGrid();
   showToast('🗑️ ลบกิจกรรมแล้ว');
@@ -734,10 +954,32 @@ document.head.appendChild(ks);
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
-if(!loadAll()) loadExtra();
 makeStars();
 buildEmojiGrid();
-renderGrid();
+// load games from Firestore (db set by Firebase script below)
+window.addEventListener('load', () => loadFromFirestore());
 </script>
-</body>
-</html>
+
+<!-- Firebase (same project as One Piece game) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBDD1NyV2KwuSd08ICSZcg2vXfRDnNaZu0",
+  authDomain: "learninguniversehub.firebaseapp.com",
+  projectId: "learninguniversehub",
+  storageBucket: "learninguniversehub.firebasestorage.app",
+  messagingSenderId: "737656163886",
+  appId: "1:737656163886:web:89148929e940c17bfa19bf"
+};
+let db = null;
+try {
+  try { firebase.app('hub'); } catch(_) { firebase.initializeApp(firebaseConfig, 'hub'); }
+  db = firebase.app('hub').firestore();
+} catch(e) {
+  console.warn('Firebase unavailable, falling back to localStorage');
+}
+// trigger load now that db is ready
+loadFromFirestore();
+</script>
+</body></html>
