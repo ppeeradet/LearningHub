@@ -72,8 +72,9 @@ html,body{width:100%;min-height:100%;background:var(--bg);
 .cat[data-c="math"].on{background:var(--blue);color:#fff;}
 .cat[data-c="science"].on{background:var(--teal);color:#000;}
 .cat[data-c="language"].on{background:var(--pink);color:#fff;}
-.cat[data-c="social"].on{background:var(--orange);color:#fff;}
-.cat[data-c="art"].on{background:var(--purple);color:#fff;}
+.cat[data-c="other"].on{background:var(--purple);color:#fff;}
+/* multi-select hint */
+.cat-hint{font-size:.72rem;color:var(--muted);padding:4px 0 0 2px;width:100%;}
 
 /* ── SECTION LABEL ── */
 .sec-label{color:var(--muted);font-size:.8rem;font-weight:600;letter-spacing:1.5px;
@@ -98,7 +99,8 @@ html,body{width:100%;min-height:100%;background:var(--bg);
 .card[data-c="math"] .card-thumb::before{background:linear-gradient(135deg,#1e3a8a,#1d4ed8);}
 .card[data-c="science"] .card-thumb::before{background:linear-gradient(135deg,#064e3b,#059669);}
 .card[data-c="language"] .card-thumb::before{background:linear-gradient(135deg,#831843,#db2777);}
-.card[data-c="social"] .card-thumb::before{background:linear-gradient(135deg,#7c2d12,#ea580c);}
+.card[data-c="other"] .card-thumb::before{background:linear-gradient(135deg,#4c1d95,#7c3aed);}
+.card[data-c="social"] .card-thumb::before{background:linear-gradient(135deg,#4c1d95,#7c3aed);}
 .card[data-c="art"] .card-thumb::before{background:linear-gradient(135deg,#4c1d95,#7c3aed);}
 
 .card-thumb-ico{position:relative;z-index:1;
@@ -120,7 +122,8 @@ html,body{width:100%;min-height:100%;background:var(--bg);
 .tag-math{background:rgba(96,165,250,.2);color:var(--blue);}
 .tag-science{background:rgba(52,211,153,.2);color:var(--teal);}
 .tag-language{background:rgba(244,114,182,.2);color:var(--pink);}
-.tag-social{background:rgba(251,146,60,.2);color:var(--orange);}
+.tag-other{background:rgba(167,139,250,.2);color:var(--purple);}
+.tag-social{background:rgba(167,139,250,.2);color:var(--purple);}
 .tag-art{background:rgba(167,139,250,.2);color:var(--purple);}
 
 .card-title{font-size:1.05rem;font-weight:700;color:var(--white);line-height:1.3;}
@@ -134,7 +137,8 @@ html,body{width:100%;min-height:100%;background:var(--bg);
 .card[data-c="math"] .card-play{background:linear-gradient(135deg,#60a5fa,#3b82f6);}
 .card[data-c="science"] .card-play{background:linear-gradient(135deg,#34d399,#10b981);}
 .card[data-c="language"] .card-play{background:linear-gradient(135deg,#f472b6,#ec4899);}
-.card[data-c="social"] .card-play{background:linear-gradient(135deg,#fb923c,#f97316);}
+.card[data-c="other"] .card-play{background:linear-gradient(135deg,#a78bfa,#8b5cf6);}
+.card[data-c="social"] .card-play{background:linear-gradient(135deg,#a78bfa,#8b5cf6);}
 .card[data-c="art"] .card-play{background:linear-gradient(135deg,#a78bfa,#8b5cf6);}
 .card-play:active{transform:scale(.94);}
 
@@ -299,9 +303,9 @@ html,body{width:100%;min-height:100%;background:var(--bg);
     <button class="cat on" data-c="all">🌈 ทั้งหมด</button>
     <button class="cat" data-c="math">🔢 คณิตศาสตร์</button>
     <button class="cat" data-c="science">🔬 วิทยาศาสตร์</button>
-    <button class="cat" data-c="language">📖 ภาษา</button>
-    <button class="cat" data-c="social">🌍 สังคม</button>
-    <button class="cat" data-c="art">🎨 ศิลปะ</button>
+    <button class="cat" data-c="language">🔤 ภาษาอังกฤษ</button>
+    <button class="cat" data-c="other">🌟 อื่นๆ</button>
+    <span class="cat-hint" id="catHint"></span>
   </div>
 
   <!-- CARD GRID -->
@@ -360,9 +364,8 @@ html,body{width:100%;min-height:100%;background:var(--bg);
         <select id="f-cat">
           <option value="math">🔢 คณิตศาสตร์</option>
           <option value="science">🔬 วิทยาศาสตร์</option>
-          <option value="language">📖 ภาษา</option>
-          <option value="social">🌍 สังคม</option>
-          <option value="art">🎨 ศิลปะ</option>
+          <option value="language">🔤 ภาษาอังกฤษ</option>
+          <option value="other">🌟 อื่นๆ</option>
         </select>
       </div>
       <div class="field">
@@ -460,7 +463,7 @@ const GAMES = [
   }
 ];
 
-let activeCat = 'all';
+let activeCats = new Set(['all']);
 let searchTerm = '';
 let nextId = 10;
 let pendingDeleteId = null;
@@ -699,7 +702,7 @@ function syncEmojiPreview() {
 // ═══════════════════════════════════════════
 //  RENDER
 // ═══════════════════════════════════════════
-const CAT_LABELS = {math:'คณิตศาสตร์',science:'วิทยาศาสตร์',language:'ภาษา',social:'สังคม',art:'ศิลปะ'};
+const CAT_LABELS = {math:'คณิตศาสตร์',science:'วิทยาศาสตร์',language:'ภาษาอังกฤษ',other:'อื่นๆ',social:'อื่นๆ',art:'อื่นๆ'};
 const BADGE_MAP = {
   new:  ['badge-new',  '✨ ใหม่'],
   hot:  ['badge-hot',  '🔥 ยอดนิยม'],
@@ -726,9 +729,16 @@ function renderGrid() {
   grid.innerHTML = '';
   let shown = 0;
 
-  const filtered = GAMES.filter(g =>
-    (activeCat === 'all' || g.cat === activeCat) && matchSearch(g)
-  );
+  const isAll = activeCats.has('all');
+  const hasOther = activeCats.has('other');
+
+  const filtered = GAMES.filter(g => {
+    if(!matchSearch(g)) return false;
+    if(isAll) return true;
+    // 'other' category also matches legacy 'social' and 'art'
+    if(hasOther && (g.cat === 'other' || g.cat === 'social' || g.cat === 'art')) return true;
+    return activeCats.has(g.cat);
+  });
 
   filtered.forEach(g => {
     shown++;
@@ -770,7 +780,8 @@ function renderGrid() {
   const empty = document.getElementById('empty');
   empty.style.display = shown === 0 ? 'block' : 'none';
 
-  const lbl = activeCat === 'all' ? 'กิจกรรมทั้งหมด' : CAT_LABELS[activeCat];
+  const lbl = activeCats.has('all') ? 'กิจกรรมทั้งหมด' :
+    [...activeCats].map(c => CAT_LABELS[c] || c).join(' + ');
   document.getElementById('secLabel').textContent = lbl + ` (${shown})`;
   document.getElementById('totalCount').textContent = GAMES.length;
   const cats = [...new Set(GAMES.map(g=>g.cat))];
@@ -783,9 +794,42 @@ function renderGrid() {
 document.getElementById('catBar').addEventListener('click', e => {
   const btn = e.target.closest('.cat');
   if(!btn) return;
-  document.querySelectorAll('.cat').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  activeCat = btn.dataset.c;
+  const c = btn.dataset.c;
+
+  if(c === 'all') {
+    // Reset to all
+    activeCats = new Set(['all']);
+  } else {
+    activeCats.delete('all');
+    if(activeCats.has(c)) {
+      // Deselect this category
+      activeCats.delete(c);
+      if(activeCats.size === 0) activeCats.add('all');
+    } else {
+      if(activeCats.size >= 2) {
+        // Remove the first selected to stay at max 2
+        const first = activeCats.values().next().value;
+        activeCats.delete(first);
+      }
+      activeCats.add(c);
+    }
+  }
+
+  // Update button states
+  document.querySelectorAll('.cat[data-c]').forEach(b => {
+    b.classList.toggle('on', activeCats.has(b.dataset.c));
+  });
+
+  // Show hint when 1 non-all category selected
+  const hint = document.getElementById('catHint');
+  if(hint) {
+    if(!activeCats.has('all') && activeCats.size === 1) {
+      hint.textContent = '✦ เลือกเพิ่มได้อีก 1 หมวด';
+    } else {
+      hint.textContent = '';
+    }
+  }
+
   renderGrid();
 });
 
