@@ -358,9 +358,10 @@ html,body{width:100%;min-height:100%;background:var(--bg);
         <small style="color:var(--muted);font-size:.75rem;padding-bottom:4px;">เช่น 6+ / 8+ / 10-14</small>
       </div>
     </div>
+    <!-- ROW 1: หมวดหมู่ที่ 1 + ระดับความยาก -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div class="field">
-        <label>หมวดหมู่</label>
+        <label>หมวดหมู่ที่ 1</label>
         <select id="f-cat">
           <option value="math">🔢 คณิตศาสตร์</option>
           <option value="science">🔬 วิทยาศาสตร์</option>
@@ -371,6 +372,29 @@ html,body{width:100%;min-height:100%;background:var(--bg);
       <div class="field">
         <label>ระดับความยาก</label>
         <select id="f-diff">
+          <option value="1">⭐ ง่ายมาก</option>
+          <option value="2">⭐⭐ ง่าย</option>
+          <option value="3">⭐⭐⭐ ปานกลาง</option>
+          <option value="4">⭐⭐⭐⭐ ยาก</option>
+          <option value="5">⭐⭐⭐⭐⭐ ยากมาก</option>
+        </select>
+      </div>
+    </div>
+    <!-- ROW 2: หมวดหมู่ที่ 2 + ระดับความยาก 2 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:-4px;">
+      <div class="field">
+        <label>หมวดหมู่ที่ 2 <span style="color:var(--muted);font-size:.72rem;">(ไม่บังคับ)</span></label>
+        <select id="f-cat2" onchange="toggleDiff2(this.value)">
+          <option value="">— ไม่มี —</option>
+          <option value="math">🔢 คณิตศาสตร์</option>
+          <option value="science">🔬 วิทยาศาสตร์</option>
+          <option value="language">🔤 ภาษาอังกฤษ</option>
+          <option value="other">🌟 อื่นๆ</option>
+        </select>
+      </div>
+      <div class="field" id="diff2Wrap" style="opacity:.35;pointer-events:none;">
+        <label>ระดับความยาก 2</label>
+        <select id="f-diff2">
           <option value="1">⭐ ง่ายมาก</option>
           <option value="2">⭐⭐ ง่าย</option>
           <option value="3">⭐⭐⭐ ปานกลาง</option>
@@ -732,12 +756,17 @@ function renderGrid() {
   const isAll = activeCats.has('all');
   const hasOther = activeCats.has('other');
 
+  function catMatches(gc) {
+    if(!gc) return false;
+    if(isAll) return true;
+    if(hasOther && (gc === 'other' || gc === 'social' || gc === 'art')) return true;
+    return activeCats.has(gc);
+  }
+
   const filtered = GAMES.filter(g => {
     if(!matchSearch(g)) return false;
     if(isAll) return true;
-    // 'other' category also matches legacy 'social' and 'art'
-    if(hasOther && (g.cat === 'other' || g.cat === 'social' || g.cat === 'art')) return true;
-    return activeCats.has(g.cat);
+    return catMatches(g.cat) || catMatches(g.cat2);
   });
 
   filtered.forEach(g => {
@@ -765,12 +794,16 @@ function renderGrid() {
       <div class="card-body">
         <div class="card-tag">
           <span class="tag tag-${g.cat}">${CAT_LABELS[g.cat] || g.cat}</span>
+          ${g.cat2 ? `<span class="tag tag-${g.cat2}">${CAT_LABELS[g.cat2] || g.cat2}</span>` : ''}
           ${g.age ? `<span style="font-size:.7rem;color:var(--muted);">👧 อายุ ${g.age}</span>` : ''}
         </div>
         <div class="card-title">${g.title}</div>
         <div class="card-desc">${g.desc}</div>
         <div class="card-footer">
-          <div class="card-diff">${diffStars(g.diff)}</div>
+          <div>
+            <div class="card-diff">${diffStars(g.diff)}</div>
+            ${g.cat2 && g.diff2 ? `<div class="card-diff" style="margin-top:2px;font-size:.72rem;opacity:.7;">${diffStars(g.diff2)}</div>` : ''}
+          </div>
           <button class="card-play" onclick="event.stopPropagation();window.open('${safeUrl}','_blank')">▶ เล่นเลย!</button>
         </div>
       </div>`;
@@ -857,6 +890,9 @@ function openModal(editId) {
     document.getElementById('f-age').value = g.age || '';
     document.getElementById('f-cat').value = g.cat;
     document.getElementById('f-diff').value = g.diff || 1;
+    document.getElementById('f-cat2').value = g.cat2 || '';
+    document.getElementById('f-diff2').value = g.diff2 || 1;
+    toggleDiff2(g.cat2 || '');
     document.getElementById('f-badge').value = g.badge || '';
     // highlight in picker
     setTimeout(() => {
@@ -879,8 +915,22 @@ function resetModal() {
   document.getElementById('f-badge').value='';
   document.getElementById('f-diff').value='1';
   document.getElementById('f-cat').value='math';
+  document.getElementById('f-cat2').value='';
+  document.getElementById('f-diff2').value='1';
+  toggleDiff2('');
   document.getElementById('f-editid').value='';
   document.querySelectorAll('.emoji-grid button').forEach(b=>b.classList.remove('picked'));
+}
+
+function toggleDiff2(cat2Val) {
+  const wrap = document.getElementById('diff2Wrap');
+  if(cat2Val) {
+    wrap.style.opacity = '1';
+    wrap.style.pointerEvents = 'auto';
+  } else {
+    wrap.style.opacity = '.35';
+    wrap.style.pointerEvents = 'none';
+  }
 }
 
 function closeModal() {
@@ -901,6 +951,7 @@ async function saveGame() {
   const saveBtn = document.querySelector('.mbtn-save');
   saveBtn.disabled = true; saveBtn.textContent = '⏳ กำลังบันทึก...';
 
+  const cat2Val = document.getElementById('f-cat2').value;
   const data = {
     title,
     desc: document.getElementById('f-desc').value.trim() || 'กิจกรรมการเรียนรู้',
@@ -908,6 +959,8 @@ async function saveGame() {
     icon: document.getElementById('f-icon').value.trim() || '📚',
     cat: document.getElementById('f-cat').value,
     diff: parseInt(document.getElementById('f-diff').value),
+    cat2: cat2Val || '',
+    diff2: cat2Val ? parseInt(document.getElementById('f-diff2').value) : 0,
     badge: document.getElementById('f-badge').value,
     age: document.getElementById('f-age').value.trim() || '',
   };
