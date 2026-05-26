@@ -62,7 +62,8 @@ html,body{width:100%;min-height:100%;background:var(--bg);
 .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1.1rem;pointer-events:none;}
 
 /* ── CATEGORY FILTER ── */
-.cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.cats{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:24px;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+.cats::-webkit-scrollbar{display:none;}
 .cat{padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.18);
   background:rgba(255,255,255,.05);color:var(--muted);font-size:.88rem;font-weight:600;
   cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit;}
@@ -455,8 +456,6 @@ html,body{width:100%;min-height:100%;background:var(--bg);
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast">✅ เพิ่มกิจกรรมสำเร็จแล้ว!</div>
 
 <script>
 // ═══════════════════════════════════════════
@@ -573,7 +572,7 @@ function showLoading(on) {
 }
 
 async function loadFromFirestore() {
-  if(!db) { loadFromLocalFallback(); return; }
+  if(!db) { loadFromLocalFallback(); renderGrid(); return; }
   showLoading(true);
   try {
     const snap = await db.collection(HUB_COL).orderBy('order','asc').get();
@@ -590,8 +589,9 @@ async function loadFromFirestore() {
       });
     }
     nextId = Math.max(...GAMES.map(g => g.id || 0), 9) + 1;
+    localBackup(); // keep localStorage in sync with Firestore
   } catch(err) {
-    console.warn('Firestore load failed, using local fallback', err);
+    
     loadFromLocalFallback();
   }
   showLoading(false);
@@ -626,13 +626,14 @@ async function firestoreSave(data, firestoreId) {
   try {
     if(firestoreId) {
       await db.collection(HUB_COL).doc(firestoreId).set(data, { merge: true });
+      localBackup();
       return firestoreId;
     } else {
       const ref = await db.collection(HUB_COL).add(data);
+      localBackup();
       return ref.id;
     }
   } catch(err) {
-    console.warn('Firestore save failed', err);
     localBackup();
     return null;
   }
@@ -642,8 +643,8 @@ async function firestoreDelete(firestoreId) {
   if(!db || !firestoreId) { localBackup(); return; }
   try {
     await db.collection(HUB_COL).doc(firestoreId).delete();
+    localBackup();
   } catch(err) {
-    console.warn('Firestore delete failed', err);
     localBackup();
   }
 }
@@ -1019,12 +1020,7 @@ document.getElementById('delModal').addEventListener('click', e => {
 // ═══════════════════════════════════════════
 //  TOAST
 // ═══════════════════════════════════════════
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('on');
-  setTimeout(() => t.classList.remove('on'), 2500);
-}
+function showToast(msg) { /* toast removed */ }
 
 // ═══════════════════════════════════════════
 //  STARS BG
@@ -1074,7 +1070,7 @@ try {
   try { firebase.app('hub'); } catch(_) { firebase.initializeApp(firebaseConfig, 'hub'); }
   db = firebase.app('hub').firestore();
 } catch(e) {
-  console.warn('Firebase unavailable, falling back to localStorage');
+  
 }
 // trigger load now that db is ready
 loadFromFirestore();
