@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🌟 Learning Universe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0f1e;
+  --card-bg: rgba(255,255,255,0.06);
+  --card-border: rgba(255,255,255,0.12);
+  --gold: #fbbf24;
+  --pink: #f472b6;
+  --teal: #34d399;
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --orange: #fb923c;
+  --red: #f87171;
+  --white: #f0f4ff;
+  --muted: rgba(240,244,255,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100%;background:var(--bg);
+  font-family:'Fredoka','Sarabun',sans-serif;color:var(--white);overflow-x:hidden;}
+
+/* ── BACKGROUND ── */
+.cosmos{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.cosmos::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99,67,255,0.18) 0%, transparent 60%),
+             radial-gradient(ellipse 60% 50% at 80% 80%, rgba(244,114,182,0.12) 0%, transparent 60%),
+             radial-gradient(ellipse 50% 40% at 50% 50%, rgba(52,211,153,0.07) 0%, transparent 70%);}
+.star-field{position:absolute;inset:0;}
+
+/* ── LAYOUT ── */
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 16px 80px;}
+
+/* ── HEADER ── */
+.hdr{text-align:center;padding:36px 0 28px;}
+.hdr-logo{font-size:clamp(2rem,7vw,3.2rem);font-weight:700;line-height:1.1;
+  background:linear-gradient(135deg,var(--gold) 0%,var(--pink) 50%,var(--purple) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 30px rgba(251,191,36,0.3));}
+.hdr-rocket{font-size:3rem;display:block;animation:float 3s ease-in-out infinite;margin-bottom:8px;}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-12px) rotate(5deg)}}
+.hdr-sub{color:var(--muted);font-size:clamp(.9rem,2.5vw,1.1rem);margin-top:8px;letter-spacing:.5px;}
+.hdr-stats{display:flex;gap:16px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+.stat-pill{padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);font-size:.85rem;color:var(--muted);
+  display:flex;align-items:center;gap:6px;}
+.stat-pill span{color:var(--white);font-weight:600;}
+
+/* ── SEARCH ── */
+.search-bar{margin-bottom:20px;position:relative;}
+.search-bar input{width:100%;padding:13px 16px 13px 44px;
+  background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);
+  border-radius:14px;color:var(--white);font-size:1rem;font-family:inherit;
+  outline:none;transition:border-color .2s;}
+.search-bar input::placeholder{color:var(--muted);}
+.search-bar input:focus{border-color:rgba(251,191,36,.5);background:rgba(255,255,255,.1);}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1.1rem;pointer-events:none;}
+
+/* ── CATEGORY FILTER ── */
+.cats{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:24px;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+.cats::-webkit-scrollbar{display:none;}
+.cat{padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.05);color:var(--muted);font-size:.88rem;font-weight:600;
+  cursor:pointer;transition:all .2s;white-space:nowrap;font-family:inherit;}
+.cat:active{transform:scale(.95);}
+.cat.on{border-color:transparent;color:#000;}
+.cat[data-c="all"].on{background:linear-gradient(135deg,var(--gold),var(--pink));color:#000;}
+.cat[data-c="math"].on{background:var(--blue);color:#fff;}
+.cat[data-c="science"].on{background:var(--teal);color:#000;}
+.cat[data-c="language"].on{background:var(--pink);color:#fff;}
+.cat[data-c="other"].on{background:var(--purple);color:#fff;}
+/* multi-select hint */
+.cat-hint{font-size:.72rem;color:var(--muted);padding:4px 0 0 2px;width:100%;}
+
+/* ── SECTION LABEL ── */
+.sec-label{color:var(--muted);font-size:.8rem;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.sec-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08);}
+
+/* ── CARD GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+
+/* ── GAME CARD ── */
+.card{background:var(--card-bg);border:1.5px solid var(--card-border);border-radius:20px;
+  overflow:hidden;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;
+  position:relative;}
+.card:active{transform:scale(.97);}
+.card:hover{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.09);}
+
+.card-thumb{height:120px;display:flex;align-items:center;justify-content:center;
+  font-size:3.2rem;position:relative;overflow:hidden;flex-shrink:0;}
+.card-thumb::before{content:'';position:absolute;inset:0;opacity:.85;}
+
+/* per-category thumb colors */
+.card[data-c="math"] .card-thumb::before{background:linear-gradient(135deg,#1e3a8a,#1d4ed8);}
+.card[data-c="science"] .card-thumb::before{background:linear-gradient(135deg,#064e3b,#059669);}
+.card[data-c="language"] .card-thumb::before{background:linear-gradient(135deg,#831843,#db2777);}
+.card[data-c="other"] .card-thumb::before{background:linear-gradient(135deg,#4c1d95,#7c3aed);}
+.card[data-c="social"] .card-thumb::before{background:linear-gradient(135deg,#4c1d95,#7c3aed);}
+.card[data-c="art"] .card-thumb::before{background:linear-gradient(135deg,#4c1d95,#7c3aed);}
+
+.card-thumb-ico{position:relative;z-index:1;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.4));line-height:1;}
+.card-badge{position:absolute;top:10px;right:10px;z-index:2;
+  padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;}
+.badge-new{background:var(--gold);color:#000;}
+.badge-hot{background:var(--red);color:#fff;}
+.badge-go{background:var(--teal);color:#000;}
+.badge-fun{background:var(--pink);color:#fff;}
+.badge-easy{background:#86efac;color:#14532d;}
+.badge-hard{background:var(--purple);color:#fff;}
+.badge-rec{background:var(--orange);color:#fff;}
+
+.card-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:6px;}
+.card-tag{display:flex;align-items:center;gap:6px;}
+.tag{padding:2px 10px;border-radius:999px;font-size:.72rem;font-weight:700;}
+.tag-math{background:rgba(96,165,250,.2);color:var(--blue);}
+.tag-science{background:rgba(52,211,153,.2);color:var(--teal);}
+.tag-language{background:rgba(244,114,182,.2);color:var(--pink);}
+.tag-other{background:rgba(167,139,250,.2);color:var(--purple);}
+.tag-social{background:rgba(167,139,250,.2);color:var(--purple);}
+.tag-art{background:rgba(167,139,250,.2);color:var(--purple);}
+
+.card-title{font-size:1.05rem;font-weight:700;color:var(--white);line-height:1.3;}
+.card-desc{font-size:.83rem;color:var(--muted);line-height:1.6;flex:1;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;
+  margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);}
+.card-diff{display:flex;gap:2px;font-size:.78rem;}
+.card-play{padding:7px 16px;border-radius:999px;border:none;
+  font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:all .15s;color:#000;}
+.card[data-c="math"] .card-play{background:linear-gradient(135deg,#60a5fa,#3b82f6);}
+.card[data-c="science"] .card-play{background:linear-gradient(135deg,#34d399,#10b981);}
+.card[data-c="language"] .card-play{background:linear-gradient(135deg,#f472b6,#ec4899);}
+.card[data-c="other"] .card-play{background:linear-gradient(135deg,#a78bfa,#8b5cf6);}
+.card[data-c="social"] .card-play{background:linear-gradient(135deg,#a78bfa,#8b5cf6);}
+.card[data-c="art"] .card-play{background:linear-gradient(135deg,#a78bfa,#8b5cf6);}
+.card-play:active{transform:scale(.94);}
+
+/* hidden card */
+.card.hidden{display:none;}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-ico{font-size:3rem;margin-bottom:12px;display:block;}
+
+/* ── ADD BUTTON ── */
+.add-wrap{text-align:center;margin-top:28px;}
+.btn-add{padding:13px 28px;background:rgba(255,255,255,.07);
+  border:1.5px dashed rgba(255,255,255,.25);border-radius:14px;
+  color:var(--muted);font-size:.95rem;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:all .2s;}
+.btn-add:hover{background:rgba(255,255,255,.11);color:var(--white);
+  border-color:rgba(255,255,255,.4);}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.75);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-bg.on{opacity:1;pointer-events:all;}
+.modal{background:#111827;border:1.5px solid rgba(255,255,255,.14);
+  border-radius:22px;padding:28px;width:min(480px,100%);
+  transform:translateY(20px);transition:transform .2s;}
+.modal-bg.on .modal{transform:translateY(0);}
+.modal h2{font-size:1.3rem;font-weight:700;margin-bottom:20px;color:var(--white);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:6px;}
+.field input,.field textarea,.field select{
+  width:100%;padding:11px 14px;background:rgba(255,255,255,.08);
+  border:1.5px solid rgba(255,255,255,.14);border-radius:10px;
+  color:var(--white);font-size:.95rem;font-family:inherit;outline:none;transition:border-color .2s;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:rgba(251,191,36,.5);}
+.field textarea{resize:vertical;min-height:72px;}
+.field select option{background:#111827;}
+.modal-btns{display:flex;gap:10px;margin-top:20px;}
+.mbtn{flex:1;padding:12px;border:none;border-radius:11px;font-size:.95rem;
+  font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
+.mbtn-cancel{background:rgba(255,255,255,.08);color:var(--muted);}
+.mbtn-save{background:linear-gradient(135deg,var(--gold),#f59e0b);color:#000;}
+.mbtn:active{transform:scale(.97);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:#1f2937;border:1px solid rgba(52,211,153,.4);border-radius:12px;
+  padding:12px 22px;color:var(--teal);font-weight:600;font-size:.9rem;
+  z-index:200;transition:transform .3s;pointer-events:none;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px;}
+
+/* ── EMOJI PICKER ── */
+.emoji-preview{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.emoji-preview-ico{font-size:2.4rem;width:52px;height:52px;display:flex;align-items:center;
+  justify-content:center;background:rgba(255,255,255,.08);border-radius:12px;
+  border:1.5px solid rgba(255,255,255,.14);flex-shrink:0;}
+.emoji-preview input{flex:1;padding:10px 12px;background:rgba(255,255,255,.08);
+  border:1.5px solid rgba(255,255,255,.14);border-radius:10px;
+  color:var(--white);font-size:1.2rem;font-family:inherit;outline:none;
+  text-align:center;width:70px;}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;
+  background:rgba(0,0,0,.25);border-radius:12px;padding:10px;
+  max-height:180px;overflow-y:auto;}
+.emoji-grid button{background:none;border:none;font-size:1.4rem;
+  cursor:pointer;border-radius:8px;padding:4px;transition:background .15s;line-height:1;}
+.emoji-grid button:hover{background:rgba(255,255,255,.15);}
+.emoji-grid button.picked{background:rgba(251,191,36,.3);outline:2px solid var(--gold);}
+.emoji-sec-label{font-size:.7rem;color:var(--muted);letter-spacing:1px;
+  text-transform:uppercase;padding:6px 2px 2px;grid-column:1/-1;}
+
+/* ── CARD ACTIONS ── */
+.card-actions{position:absolute;top:8px;left:8px;z-index:3;
+  display:flex;gap:5px;opacity:0;transition:opacity .2s;}
+.card:hover .card-actions{opacity:1;}
+.card-action-btn{padding:5px 9px;border:none;border-radius:8px;
+  font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;
+  transition:all .15s;backdrop-filter:blur(6px);}
+.btn-edit{background:rgba(96,165,250,.85);color:#fff;}
+.btn-del{background:rgba(248,113,113,.85);color:#fff;}
+.card-action-btn:active{transform:scale(.93);}
+
+/* ── PASSWORD MODAL ── */
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.pw-modal-bg{position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.82);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .2s;}
+.pw-modal-bg.on{opacity:1;pointer-events:all;}
+.pw-modal{background:#0d1b2e;border:1.5px solid rgba(251,191,36,.35);
+  border-radius:22px;padding:32px 28px;text-align:center;width:min(340px,100%);
+  transform:scale(.9);transition:transform .2s;}
+.pw-modal-bg.on .pw-modal{transform:scale(1);}
+.pw-ico{font-size:2.5rem;margin-bottom:10px;}
+.pw-title{color:var(--white);font-size:1.15rem;font-weight:700;margin-bottom:6px;}
+.pw-sub{color:var(--muted);font-size:.85rem;margin-bottom:20px;}
+.pw-input-wrap{position:relative;margin-bottom:16px;}
+.pw-input{width:100%;padding:13px 44px 13px 16px;background:rgba(255,255,255,.08);
+  border:1.5px solid rgba(255,255,255,.18);border-radius:12px;
+  color:var(--white);font-size:1.1rem;font-family:inherit;outline:none;
+  text-align:center;letter-spacing:4px;transition:border-color .2s;}
+.pw-input:focus{border-color:rgba(251,191,36,.6);}
+.pw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--muted);}
+.pw-error{color:var(--red);font-size:.82rem;margin-bottom:12px;min-height:18px;}
+.pw-btns{display:flex;gap:10px;}
+.pw-btns button{flex:1;padding:12px;border:none;border-radius:11px;font-size:.95rem;
+  font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
+.pw-cancel{background:rgba(255,255,255,.08);color:var(--muted);}
+.pw-confirm{background:linear-gradient(135deg,var(--gold),#f59e0b);color:#000;}
+.pw-btns button:active{transform:scale(.97);}
+
+/* ── DELETE CONFIRM ── */
+.del-modal-bg{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.8);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  opacity:0;pointer-events:none;transition:opacity .2s;}
+.del-modal-bg.on{opacity:1;pointer-events:all;}
+.del-modal{background:#1f1035;border:1.5px solid rgba(248,113,113,.4);
+  border-radius:20px;padding:28px 24px;text-align:center;width:min(340px,100%);
+  transform:scale(.9);transition:transform .2s;}
+.del-modal-bg.on .del-modal{transform:scale(1);}
+.del-ico{font-size:2.8rem;margin-bottom:10px;}
+.del-title{color:var(--white);font-size:1.1rem;font-weight:700;margin-bottom:6px;}
+.del-sub{color:var(--muted);font-size:.88rem;margin-bottom:22px;line-height:1.5;}
+.del-btns{display:flex;gap:10px;}
+.del-btns button{flex:1;padding:12px;border:none;border-radius:11px;font-size:.95rem;
+  font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-del-cancel{background:rgba(255,255,255,.1);color:var(--muted);}
+.btn-del-confirm{background:linear-gradient(135deg,#f87171,#ef4444);color:#fff;}
+.del-btns button:active{transform:scale(.97);}
+</style>
+</head>
+<body>
+
+<!-- COSMIC BG -->
+<div class="cosmos"><div class="star-field" id="stars"></div></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <span class="hdr-rocket">🚀</span>
+    <div class="hdr-logo">Learning Universe</div>
+    <div class="hdr-sub">เลือกกิจกรรม · เรียนรู้ · สนุกได้เลย! 🌟</div>
+    <div class="hdr-stats">
+      <div class="stat-pill">🎮 กิจกรรมทั้งหมด <span id="totalCount">0</span> รายการ</div>
+      <div class="stat-pill">📚 หมวดหมู่ <span id="catCount">0</span> หมวด</div>
+    </div>
+  </header>
+
+  <!-- SEARCH -->
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="ค้นหากิจกรรม..." autocomplete="off">
+  </div>
+
+  <!-- CATEGORY FILTER -->
+  <div class="cats" id="catBar">
+    <button class="cat on" data-c="all">🌈 ทั้งหมด</button>
+    <button class="cat" data-c="math">🔢 คณิตศาสตร์</button>
+    <button class="cat" data-c="science">🔬 วิทยาศาสตร์</button>
+    <button class="cat" data-c="language">🔤 ภาษาอังกฤษ</button>
+    <button class="cat" data-c="other">🌟 อื่นๆ</button>
+    <span class="cat-hint" id="catHint"></span>
+  </div>
+
+  <!-- CARD GRID -->
+  <div class="sec-label" id="secLabel">กิจกรรมทั้งหมด</div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">
+    <span class="empty-ico">🔭</span>
+    ไม่พบกิจกรรมที่ค้นหา ลองเปลี่ยนคำค้นหาดูนะ
+  </div>
+
+  <!-- ADD BUTTON -->
+  <div class="add-wrap">
+    <button class="btn-add" onclick="requirePw('เพิ่มกิจกรรมใหม่', () => openModal())">✦ เพิ่มกิจกรรมใหม่</button>
+  </div>
+
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h2 id="modalTitle">✦ เพิ่มกิจกรรมใหม่</h2>
+    <input type="hidden" id="f-editid" value="">
+    <div class="field">
+      <label>ชื่อกิจกรรม *</label>
+      <input id="f-title" type="text" placeholder="เช่น One Piece Math Adventure">
+    </div>
+    <div class="field">
+      <label>คำอธิบายสั้นๆ</label>
+      <textarea id="f-desc" placeholder="เช่น ฝึกคณิตศาสตร์ผ่านการผจญภัยของลูฟี่"></textarea>
+    </div>
+    <div class="field">
+      <label>ลิงก์ URL *</label>
+      <input id="f-url" type="url" placeholder="https://...">
+    </div>
+    <div class="field">
+      <label>ไอคอน (emoji)</label>
+      <div class="emoji-preview">
+        <div class="emoji-preview-ico" id="emojiPreview">📚</div>
+        <input id="f-icon" type="text" placeholder="📚" maxlength="4" style="width:70px;text-align:center;" oninput="syncEmojiPreview()">
+        <span style="color:var(--muted);font-size:.8rem;">← พิมพ์เองหรือเลือกด้านล่าง</span>
+      </div>
+      <div class="emoji-grid" id="emojiGrid"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field">
+        <label>อายุที่เหมาะสม</label>
+        <input id="f-age" type="text" placeholder="เช่น 6+ หรือ 8-12">
+      </div>
+      <div class="field" style="display:flex;align-items:flex-end;">
+        <small style="color:var(--muted);font-size:.75rem;padding-bottom:4px;">เช่น 6+ / 8+ / 10-14</small>
+      </div>
+    </div>
+    <!-- ROW 1: หมวดหมู่ที่ 1 + ระดับความยาก -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field">
+        <label>หมวดหมู่ที่ 1</label>
+        <select id="f-cat">
+          <option value="math">🔢 คณิตศาสตร์</option>
+          <option value="science">🔬 วิทยาศาสตร์</option>
+          <option value="language">🔤 ภาษาอังกฤษ</option>
+          <option value="other">🌟 อื่นๆ</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>ระดับความยาก</label>
+        <select id="f-diff">
+          <option value="1">⭐ ง่ายมาก</option>
+          <option value="2">⭐⭐ ง่าย</option>
+          <option value="3">⭐⭐⭐ ปานกลาง</option>
+          <option value="4">⭐⭐⭐⭐ ยาก</option>
+          <option value="5">⭐⭐⭐⭐⭐ ยากมาก</option>
+        </select>
+      </div>
+    </div>
+    <!-- ROW 2: หมวดหมู่ที่ 2 + ระดับความยาก 2 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:-4px;">
+      <div class="field">
+        <label>หมวดหมู่ที่ 2 <span style="color:var(--muted);font-size:.72rem;">(ไม่บังคับ)</span></label>
+        <select id="f-cat2" onchange="toggleDiff2(this.value)">
+          <option value="">— ไม่มี —</option>
+          <option value="math">🔢 คณิตศาสตร์</option>
+          <option value="science">🔬 วิทยาศาสตร์</option>
+          <option value="language">🔤 ภาษาอังกฤษ</option>
+          <option value="other">🌟 อื่นๆ</option>
+        </select>
+      </div>
+      <div class="field" id="diff2Wrap" style="opacity:.35;pointer-events:none;">
+        <label>ระดับความยาก 2</label>
+        <select id="f-diff2">
+          <option value="1">⭐ ง่ายมาก</option>
+          <option value="2">⭐⭐ ง่าย</option>
+          <option value="3">⭐⭐⭐ ปานกลาง</option>
+          <option value="4">⭐⭐⭐⭐ ยาก</option>
+          <option value="5">⭐⭐⭐⭐⭐ ยากมาก</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>ป้าย (badge)</label>
+      <select id="f-badge">
+        <option value="">ไม่มี</option>
+        <option value="new">✨ ใหม่</option>
+        <option value="hot">🔥 ยอดนิยม</option>
+        <option value="go">🚀 ไปลองกันเถอะ</option>
+        <option value="fun">🎉 สนุกสุด!</option>
+        <option value="easy">😊 เริ่มต้นง่าย</option>
+        <option value="hard">💪 ท้าทาย</option>
+        <option value="rec">⭐ แนะนำ</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn mbtn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="mbtn mbtn-save" onclick="saveGame()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="pw-modal-bg" id="pwModal">
+  <div class="pw-modal">
+    <div class="pw-ico">🔐</div>
+    <div class="pw-title">ใส่รหัสผ่านก่อนนะ</div>
+    <div class="pw-sub" id="pwSub">สำหรับผู้ดูแลระบบเท่านั้น</div>
+    <div class="pw-input-wrap">
+      <input class="pw-input" id="pwInput" type="password" placeholder="• • • • •"
+        maxlength="10" autocomplete="off" onkeydown="if(event.key==='Enter')checkPw()">
+      <button class="pw-toggle" onclick="togglePwVis()" id="pwToggle">👁️</button>
+    </div>
+    <div class="pw-error" id="pwError"></div>
+    <div class="pw-btns">
+      <button class="pw-cancel" onclick="closePwModal()">ยกเลิก</button>
+      <button class="pw-confirm" onclick="checkPw()">🔓 เข้าสู่ระบบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="del-modal-bg" id="delModal">
+  <div class="del-modal">
+    <div class="del-ico">🗑️</div>
+    <div class="del-title">ลบกิจกรรมนี้?</div>
+    <div class="del-sub" id="delSub">คุณแน่ใจหรือไม่ว่าต้องการลบ?<br>ไม่สามารถกู้คืนได้</div>
+    <div class="del-btns">
+      <button class="btn-del-cancel" onclick="closeDelModal()">ยกเลิก</button>
+      <button class="btn-del-confirm" onclick="confirmDelete()">🗑️ ลบเลย</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ═══════════════════════════════════════════
+//  GAME DATA
+// ═══════════════════════════════════════════
+const GAMES = [
+  {
+    id: 1,
+    title: 'Harry Potter: Math Adventure',
+    desc: 'ฝึกคณิตศาสตร์พื้นฐานสุดสนุก! ผ่านเวทมนต์และการผจญภัย',
+    url: 'https://ppeeradet.github.io/MagicMath01/',
+    icon: '⚡',
+    cat: 'math',
+    diff: 1,
+    badge: 'hot',
+    age: '6+'
+  },
+  {
+    id: 2,
+    title: 'One Piece: East Blue Math',
+    desc: 'ผจญภัยกับลูฟี่ผ่านอีสต์บลู 7 ด่าน! บวกลบคูณหาร 3-5 หลัก พร้อมเรื่องราวภาษาไทย',
+    url: 'https://ppeeradet.github.io/One_Piece_East_Blue_Ace/',
+    icon: '🏴‍☠️',
+    cat: 'math',
+    diff: 2,
+    badge: 'new',
+    age: '7+'
+  }
+];
+
+let activeCats = new Set(['all']);
+let searchTerm = '';
+let nextId = 10;
+let pendingDeleteId = null;
+
+// ═══════════════════════════════════════════
+//  PASSWORD GATE
+// ═══════════════════════════════════════════
+const PW = '47668';
+let pwUnlocked = false;
+let pwCallback = null; // function to call after unlock
+
+function requirePw(label, callback) {
+  if(pwUnlocked) { callback(); return; }
+  pwCallback = callback;
+  document.getElementById('pwSub').textContent = label;
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  document.getElementById('pwModal').classList.add('on');
+  setTimeout(() => document.getElementById('pwInput').focus(), 120);
+}
+
+function checkPw() {
+  const val = document.getElementById('pwInput').value;
+  if(val === PW) {
+    pwUnlocked = true;
+    document.getElementById('pwModal').classList.remove('on');
+    document.getElementById('pwError').textContent = '';
+    if(pwCallback) { pwCallback(); pwCallback = null; }
+  } else {
+    document.getElementById('pwError').textContent = '❌ รหัสผ่านไม่ถูกต้อง ลองใหม่อีกครั้ง';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+    // shake animation
+    const inp = document.getElementById('pwInput');
+    inp.style.animation = 'none';
+    setTimeout(() => { inp.style.animation = 'shake .35s ease'; }, 10);
+  }
+}
+
+function closePwModal() {
+  pwCallback = null;
+  document.getElementById('pwModal').classList.remove('on');
+  document.getElementById('pwError').textContent = '';
+}
+
+function togglePwVis() {
+  const inp = document.getElementById('pwInput');
+  const tog = document.getElementById('pwToggle');
+  if(inp.type === 'password') { inp.type = 'text'; tog.textContent = '🙈'; }
+  else { inp.type = 'password'; tog.textContent = '👁️'; }
+}
+
+document.getElementById('pwModal').addEventListener('click', e => {
+  if(e.target === document.getElementById('pwModal')) closePwModal();
+});
+
+// ═══════════════════════════════════════════
+//  FIRESTORE STORAGE
+// ═══════════════════════════════════════════
+const HUB_COL = 'hub_games';
+
+// Default built-in games (seeded to Firestore on first run)
+const DEFAULT_GAMES = [
+  { firestoreId: 'game_001', id: 1, title: 'Harry Potter: Math Adventure',
+    desc: 'ฝึกคณิตศาสตร์พื้นฐานสุดสนุก! ผ่านเวทมนต์และการผจญภัย',
+    url: 'https://ppeeradet.github.io/MagicMath01/',
+    icon: '⚡', cat: 'math', diff: 1, badge: 'hot', age: '6+', order: 1 },
+  { firestoreId: 'game_002', id: 2, title: 'One Piece: East Blue Math',
+    desc: 'ผจญภัยกับลูฟี่ผ่านอีสต์บลู 7 ด่าน! บวกลบคูณหาร 3-5 หลัก พร้อมเรื่องราวภาษาไทย',
+    url: 'https://ppeeradet.github.io/One_Piece_East_Blue_Ace/',
+    icon: '🏴‍☠️', cat: 'math', diff: 2, badge: 'new', age: '7+', order: 2 },
+];
+
+function showLoading(on) {
+  let el = document.getElementById('loadingBar');
+  if(!el) {
+    el = document.createElement('div');
+    el.id = 'loadingBar';
+    el.style.cssText = 'position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#fbbf24,#f472b6,#a78bfa);z-index:999;transition:opacity .3s;';
+    document.body.appendChild(el);
+  }
+  el.style.opacity = on ? '1' : '0';
+}
+
+async function loadFromFirestore() {
+  if(!db) { loadFromLocalFallback(); renderGrid(); return; }
+  showLoading(true);
+  try {
+    const snap = await db.collection(HUB_COL).orderBy('order','asc').get();
+    if(snap.empty) {
+      // First time: seed default games
+      await seedDefaults();
+      GAMES.length = 0;
+      DEFAULT_GAMES.forEach(g => GAMES.push({...g}));
+    } else {
+      GAMES.length = 0;
+      snap.forEach(doc => {
+        const d = doc.data();
+        GAMES.push({ ...d, firestoreId: doc.id });
+      });
+    }
+    nextId = Math.max(...GAMES.map(g => g.id || 0), 9) + 1;
+    localBackup(); // keep localStorage in sync with Firestore
+  } catch(err) {
+    
+    loadFromLocalFallback();
+  }
+  showLoading(false);
+  renderGrid();
+}
+
+async function seedDefaults() {
+  if(!db) return;
+  const batch = db.batch();
+  DEFAULT_GAMES.forEach(g => {
+    const ref = db.collection(HUB_COL).doc(g.firestoreId);
+    batch.set(ref, g);
+  });
+  await batch.commit();
+}
+
+function loadFromLocalFallback() {
+  GAMES.length = 0;
+  try {
+    const saved = JSON.parse(localStorage.getItem('bb_games_all') || 'null');
+    if(saved && saved.length) { saved.forEach(g => GAMES.push(g)); return; }
+  } catch(_) {}
+  DEFAULT_GAMES.forEach(g => GAMES.push({...g}));
+}
+
+function localBackup() {
+  try { localStorage.setItem('bb_games_all', JSON.stringify(GAMES)); } catch(_) {}
+}
+
+async function firestoreSave(data, firestoreId) {
+  if(!db) { localBackup(); return null; }
+  try {
+    if(firestoreId) {
+      await db.collection(HUB_COL).doc(firestoreId).set(data, { merge: true });
+      localBackup();
+      return firestoreId;
+    } else {
+      const ref = await db.collection(HUB_COL).add(data);
+      localBackup();
+      return ref.id;
+    }
+  } catch(err) {
+    localBackup();
+    return null;
+  }
+}
+
+async function firestoreDelete(firestoreId) {
+  if(!db || !firestoreId) { localBackup(); return; }
+  try {
+    await db.collection(HUB_COL).doc(firestoreId).delete();
+    localBackup();
+  } catch(err) {
+    localBackup();
+  }
+}
+
+// ═══════════════════════════════════════════
+//  EMOJI DATA
+// ═══════════════════════════════════════════
+const EMOJI_SECTIONS = [
+  { label: '🔢 คณิต & วิทย์', emojis: ['🔢','🧮','➕','➖','✖️','➗','📐','📏','🔬','🧪','⚗️','🔭','🧬','🧫','💡','🔋','⚡','🧲','🌡️','🔩'] },
+  { label: '📚 ภาษา & ศิลปะ', emojis: ['📖','📚','📝','✏️','🖊️','🖋️','💬','🗣️','🔤','🅰️','🎨','🎭','🎬','🎵','🎸','🎹','🥁','🎷','🎺','🖼️'] },
+  { label: '🌍 โลก & ธรรมชาติ', emojis: ['🌍','🌎','🌏','🌊','🌋','🏔️','🌿','🍀','🌺','🦁','🐬','🦋','🐉','🦅','🌙','☀️','⭐','🌈','🌸','🍃'] },
+  { label: '🚀 ผจญภัย & เกม', emojis: ['🚀','🏴‍☠️','⚡','🧙‍♀️','🧙‍♂️','🏰','🗡️','🛡️','🎮','🎲','🎯','🧩','🏆','🥇','💎','👑','🔮','🗺️','⚓','🎪'] },
+  { label: '🌌 อวกาศ & เทคโน', emojis: ['🌌','🪐','🛸','🌠','💫','🌟','🤖','💻','📱','⌨️','🖥️','🛰️','🔭','👾','🕹️','📡','🔑','🧭','⚙️','🔐'] },
+];
+
+// ═══════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════
+function loadExtra() {
+  try {
+    const e = JSON.parse(localStorage.getItem('bb_games') || '[]');
+    e.forEach(g => { if(!GAMES.find(x=>x.id===g.id)) GAMES.push(g); });
+    // sync nextId
+    const maxId = Math.max(...GAMES.map(g=>g.id), 9);
+    nextId = maxId + 1;
+  } catch(_) {}
+}
+function saveAll() {
+  try {
+    // save all games including built-in (so edits persist)
+    localStorage.setItem('bb_games_all', JSON.stringify(GAMES));
+  } catch(_) {}
+}
+function loadAll() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('bb_games_all') || 'null');
+    if(saved && saved.length) {
+      GAMES.length = 0;
+      saved.forEach(g => GAMES.push(g));
+      nextId = Math.max(...GAMES.map(g=>g.id), 9) + 1;
+      return true;
+    }
+  } catch(_) {}
+  return false;
+}
+
+// ═══════════════════════════════════════════
+//  EMOJI PICKER
+// ═══════════════════════════════════════════
+function buildEmojiGrid() {
+  const grid = document.getElementById('emojiGrid');
+  if(!grid) return;
+  let html = '';
+  EMOJI_SECTIONS.forEach(sec => {
+    html += `<div class="emoji-sec-label">${sec.label}</div>`;
+    sec.emojis.forEach(e => {
+      html += `<button type="button" onclick="pickEmoji('${e}')" title="${e}">${e}</button>`;
+    });
+  });
+  grid.innerHTML = html;
+}
+
+function pickEmoji(e) {
+  document.getElementById('f-icon').value = e;
+  document.getElementById('emojiPreview').textContent = e;
+  // highlight picked
+  document.querySelectorAll('.emoji-grid button').forEach(b => {
+    b.classList.toggle('picked', b.textContent.trim() === e);
+  });
+}
+
+function syncEmojiPreview() {
+  const v = document.getElementById('f-icon').value.trim();
+  document.getElementById('emojiPreview').textContent = v || '📚';
+  document.querySelectorAll('.emoji-grid button').forEach(b => {
+    b.classList.toggle('picked', b.textContent.trim() === v);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+const CAT_LABELS = {math:'คณิตศาสตร์',science:'วิทยาศาสตร์',language:'ภาษาอังกฤษ',other:'อื่นๆ',social:'อื่นๆ',art:'อื่นๆ'};
+const BADGE_MAP = {
+  new:  ['badge-new',  '✨ ใหม่'],
+  hot:  ['badge-hot',  '🔥 ยอดนิยม'],
+  go:   ['badge-go',   '🚀 ไปลองกันเถอะ'],
+  fun:  ['badge-fun',  '🎉 สนุกสุด!'],
+  easy: ['badge-easy', '😊 เริ่มต้นง่าย'],
+  hard: ['badge-hard', '💪 ท้าทาย'],
+  rec:  ['badge-rec',  '⭐ แนะนำ'],
+};
+
+function diffStars(d) {
+  const n = parseInt(d) || 1;
+  const labels = ['','ง่ายมาก','ง่าย','ปานกลาง','ยาก','ยากมาก'];
+  return '⭐'.repeat(n) + '☆'.repeat(5-n) + `<span style="font-size:.68rem;color:var(--muted);margin-left:4px;">${labels[n]||''}</span>`;
+}
+function matchSearch(g) {
+  if(!searchTerm) return true;
+  const q = searchTerm.toLowerCase();
+  return g.title.toLowerCase().includes(q) || g.desc.toLowerCase().includes(q);
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  let shown = 0;
+
+  const isAll = activeCats.has('all');
+  const hasOther = activeCats.has('other');
+
+  function catMatches(gc) {
+    if(!gc) return false;
+    if(isAll) return true;
+    if(hasOther && (gc === 'other' || gc === 'social' || gc === 'art')) return true;
+    return activeCats.has(gc);
+  }
+
+  const filtered = GAMES.filter(g => {
+    if(!matchSearch(g)) return false;
+    if(isAll) return true;
+    return catMatches(g.cat) || catMatches(g.cat2);
+  });
+
+  filtered.forEach(g => {
+    shown++;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.c = g.cat;
+    card.onclick = () => window.open(g.url, '_blank');
+
+    const bInfo = g.badge && BADGE_MAP[g.badge];
+    const badge = bInfo ? `<span class="card-badge ${bInfo[0]}">${bInfo[1]}</span>` : '';
+
+    // safe url for inline onclick
+    const safeUrl = g.url.replace(/'/g, "\\'");
+
+    card.innerHTML = `
+      <div class="card-actions">
+        <button class="card-action-btn btn-edit" onclick="event.stopPropagation();requirePw('แก้ไขกิจกรรม', () => openModal(${g.id}))">✏️ แก้ไข</button>
+        <button class="card-action-btn btn-del" onclick="event.stopPropagation();requirePw('ลบกิจกรรม', () => openDelModal(${g.id}))">🗑️</button>
+      </div>
+      <div class="card-thumb">
+        ${badge}
+        <span class="card-thumb-ico">${g.icon || '📚'}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-tag">
+          <span class="tag tag-${g.cat}">${CAT_LABELS[g.cat] || g.cat}</span>
+          ${g.cat2 ? `<span class="tag tag-${g.cat2}">${CAT_LABELS[g.cat2] || g.cat2}</span>` : ''}
+          ${g.age ? `<span style="font-size:.7rem;color:var(--muted);">👧 อายุ ${g.age}</span>` : ''}
+        </div>
+        <div class="card-title">${g.title}</div>
+        <div class="card-desc">${g.desc}</div>
+        <div class="card-footer">
+          <div>
+            <div class="card-diff">${diffStars(g.diff)}</div>
+            ${g.cat2 && g.diff2 ? `<div class="card-diff" style="margin-top:2px;font-size:.72rem;opacity:.7;">${diffStars(g.diff2)}</div>` : ''}
+          </div>
+          <button class="card-play" onclick="event.stopPropagation();window.open('${safeUrl}','_blank')">▶ เล่นเลย!</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  const empty = document.getElementById('empty');
+  empty.style.display = shown === 0 ? 'block' : 'none';
+
+  const lbl = activeCats.has('all') ? 'กิจกรรมทั้งหมด' :
+    [...activeCats].map(c => CAT_LABELS[c] || c).join(' + ');
+  document.getElementById('secLabel').textContent = lbl + ` (${shown})`;
+  document.getElementById('totalCount').textContent = GAMES.length;
+  const cats = [...new Set(GAMES.map(g=>g.cat))];
+  document.getElementById('catCount').textContent = cats.length;
+}
+
+// ═══════════════════════════════════════════
+//  FILTER & SEARCH
+// ═══════════════════════════════════════════
+document.getElementById('catBar').addEventListener('click', e => {
+  const btn = e.target.closest('.cat');
+  if(!btn) return;
+  const c = btn.dataset.c;
+
+  if(c === 'all') {
+    // Reset to all
+    activeCats = new Set(['all']);
+  } else {
+    activeCats.delete('all');
+    if(activeCats.has(c)) {
+      // Deselect this category
+      activeCats.delete(c);
+      if(activeCats.size === 0) activeCats.add('all');
+    } else {
+      if(activeCats.size >= 2) {
+        // Remove the first selected to stay at max 2
+        const first = activeCats.values().next().value;
+        activeCats.delete(first);
+      }
+      activeCats.add(c);
+    }
+  }
+
+  // Update button states
+  document.querySelectorAll('.cat[data-c]').forEach(b => {
+    b.classList.toggle('on', activeCats.has(b.dataset.c));
+  });
+
+  // Show hint when 1 non-all category selected
+  const hint = document.getElementById('catHint');
+  if(hint) {
+    if(!activeCats.has('all') && activeCats.size === 1) {
+      hint.textContent = '✦ เลือกเพิ่มได้อีก 1 หมวด';
+    } else {
+      hint.textContent = '';
+    }
+  }
+
+  renderGrid();
+});
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value.trim();
+  renderGrid();
+});
+
+// ═══════════════════════════════════════════
+//  MODAL — ADD / EDIT
+// ═══════════════════════════════════════════
+function openModal(editId) {
+  const isEdit = editId !== undefined;
+  document.getElementById('modalTitle').textContent = isEdit ? '✏️ แก้ไขกิจกรรม' : '✦ เพิ่มกิจกรรมใหม่';
+  document.getElementById('f-editid').value = isEdit ? editId : '';
+
+  if(isEdit) {
+    const g = GAMES.find(x => x.id === editId);
+    if(!g) return;
+    document.getElementById('f-title').value = g.title;
+    document.getElementById('f-desc').value = g.desc;
+    document.getElementById('f-url').value = g.url;
+    document.getElementById('f-icon').value = g.icon || '📚';
+    document.getElementById('emojiPreview').textContent = g.icon || '📚';
+    document.getElementById('f-age').value = g.age || '';
+    document.getElementById('f-cat').value = g.cat;
+    document.getElementById('f-diff').value = g.diff || 1;
+    document.getElementById('f-cat2').value = g.cat2 || '';
+    document.getElementById('f-diff2').value = g.diff2 || 1;
+    toggleDiff2(g.cat2 || '');
+    document.getElementById('f-badge').value = g.badge || '';
+    // highlight in picker
+    setTimeout(() => {
+      document.querySelectorAll('.emoji-grid button').forEach(b => {
+        b.classList.toggle('picked', b.textContent.trim() === g.icon);
+      });
+    }, 50);
+  } else {
+    resetModal();
+  }
+
+  document.getElementById('modal').classList.add('on');
+  document.getElementById('f-title').focus();
+}
+
+function resetModal() {
+  ['f-title','f-desc','f-url','f-age'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-icon').value = '📚';
+  document.getElementById('emojiPreview').textContent = '📚';
+  document.getElementById('f-badge').value='';
+  document.getElementById('f-diff').value='1';
+  document.getElementById('f-cat').value='math';
+  document.getElementById('f-cat2').value='';
+  document.getElementById('f-diff2').value='1';
+  toggleDiff2('');
+  document.getElementById('f-editid').value='';
+  document.querySelectorAll('.emoji-grid button').forEach(b=>b.classList.remove('picked'));
+}
+
+function toggleDiff2(cat2Val) {
+  const wrap = document.getElementById('diff2Wrap');
+  if(cat2Val) {
+    wrap.style.opacity = '1';
+    wrap.style.pointerEvents = 'auto';
+  } else {
+    wrap.style.opacity = '.35';
+    wrap.style.pointerEvents = 'none';
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('on');
+  resetModal();
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if(e.target === document.getElementById('modal')) closeModal();
+});
+
+async function saveGame() {
+  const title = document.getElementById('f-title').value.trim();
+  const url = document.getElementById('f-url').value.trim();
+  if(!title || !url) { alert('กรุณากรอกชื่อและลิงก์ URL'); return; }
+
+  const editId = document.getElementById('f-editid').value;
+  const saveBtn = document.querySelector('.mbtn-save');
+  saveBtn.disabled = true; saveBtn.textContent = '⏳ กำลังบันทึก...';
+
+  const cat2Val = document.getElementById('f-cat2').value;
+  const data = {
+    title,
+    desc: document.getElementById('f-desc').value.trim() || 'กิจกรรมการเรียนรู้',
+    url,
+    icon: document.getElementById('f-icon').value.trim() || '📚',
+    cat: document.getElementById('f-cat').value,
+    diff: parseInt(document.getElementById('f-diff').value),
+    cat2: cat2Val || '',
+    diff2: cat2Val ? parseInt(document.getElementById('f-diff2').value) : 0,
+    badge: document.getElementById('f-badge').value,
+    age: document.getElementById('f-age').value.trim() || '',
+  };
+
+  if(editId) {
+    const idx = GAMES.findIndex(g => g.id === parseInt(editId));
+    const existingFsId = idx > -1 ? GAMES[idx].firestoreId : null;
+    Object.assign(data, { id: parseInt(editId), order: idx > -1 ? (GAMES[idx].order || idx) : 99 });
+    await firestoreSave(data, existingFsId);
+    if(idx > -1) Object.assign(GAMES[idx], data);
+    showToast('✅ แก้ไขเรียบร้อยแล้ว!');
+  } else {
+    const newId = nextId++;
+    const order = GAMES.length + 1;
+    Object.assign(data, { id: newId, order });
+    const fsId = await firestoreSave(data, null);
+    GAMES.push({ ...data, firestoreId: fsId });
+    showToast('✅ เพิ่มกิจกรรมสำเร็จแล้ว! ทุกเครื่องจะเห็นแล้ว 🌐');
+  }
+
+  localBackup();
+  saveBtn.disabled = false; saveBtn.textContent = '💾 บันทึก';
+  closeModal();
+  renderGrid();
+}
+
+// ═══════════════════════════════════════════
+//  DELETE
+// ═══════════════════════════════════════════
+function openDelModal(id) {
+  pendingDeleteId = id;
+  const g = GAMES.find(x => x.id === id);
+  document.getElementById('delSub').innerHTML =
+    `ลบ "<strong style="color:var(--white)">${g ? g.title : ''}</strong>" ออกจากรายการ?<br><span style="color:var(--red);font-size:.8rem;">ไม่สามารถกู้คืนได้</span>`;
+  document.getElementById('delModal').classList.add('on');
+}
+function closeDelModal() {
+  pendingDeleteId = null;
+  document.getElementById('delModal').classList.remove('on');
+}
+async function confirmDelete() {
+  if(pendingDeleteId === null) return;
+  const idx = GAMES.findIndex(g => g.id === pendingDeleteId);
+  const fsId = idx > -1 ? GAMES[idx].firestoreId : null;
+  await firestoreDelete(fsId);
+  if(idx > -1) GAMES.splice(idx, 1);
+  localBackup();
+  closeDelModal();
+  renderGrid();
+  showToast('🗑️ ลบกิจกรรมแล้ว');
+}
+document.getElementById('delModal').addEventListener('click', e => {
+  if(e.target === document.getElementById('delModal')) closeDelModal();
+});
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+function showToast(msg) { /* toast removed */ }
+
+// ═══════════════════════════════════════════
+//  STARS BG
+// ═══════════════════════════════════════════
+function makeStars() {
+  const sf = document.getElementById('stars');
+  let html = '';
+  for(let i=0;i<120;i++){
+    const s = (Math.random()*2+0.5).toFixed(1);
+    const x = (Math.random()*100).toFixed(1);
+    const y = (Math.random()*100).toFixed(1);
+    const d = (Math.random()*5).toFixed(1);
+    const dur = (2+Math.random()*4).toFixed(1);
+    html += `<div style="position:absolute;width:${s}px;height:${s}px;left:${x}%;top:${y}%;
+      background:#fff;border-radius:50%;opacity:0.15;
+      animation:twk ${dur}s ${d}s ease-in-out infinite;"></div>`;
+  }
+  sf.innerHTML = html;
+}
+const ks = document.createElement('style');
+ks.textContent='@keyframes twk{0%,100%{opacity:.08}50%{opacity:.7}}';
+document.head.appendChild(ks);
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+makeStars();
+buildEmojiGrid();
+// load games from Firestore (db set by Firebase script below)
+window.addEventListener('load', () => loadFromFirestore());
+</script>
+
+<!-- Firebase (same project as One Piece game) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBDD1NyV2KwuSd08ICSZcg2vXfRDnNaZu0",
+  authDomain: "learninguniversehub.firebaseapp.com",
+  projectId: "learninguniversehub",
+  storageBucket: "learninguniversehub.firebasestorage.app",
+  messagingSenderId: "737656163886",
+  appId: "1:737656163886:web:89148929e940c17bfa19bf"
+};
+let db = null;
+try {
+  try { firebase.app('hub'); } catch(_) { firebase.initializeApp(firebaseConfig, 'hub'); }
+  db = firebase.app('hub').firestore();
+} catch(e) {
+  
+}
+// trigger load now that db is ready
+loadFromFirestore();
+</script>
+</body></html>
