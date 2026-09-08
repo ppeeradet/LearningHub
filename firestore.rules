@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /hub_games/{gameId} {
+      allow read: if true;
+      allow create, update: if validGame();
+      // Kept for compatibility with the current client-side admin flow.
+      // Firebase Authentication is required for true administrator-only writes.
+      allow delete: if true;
+    }
+
+    function validGame() {
+      return request.resource.data.keys().hasAll(
+               ['id', 'title', 'desc', 'url', 'icon', 'cat', 'diff', 'order'])
+             && request.resource.data.id is number
+             && request.resource.data.id >= 1
+             && request.resource.data.title is string
+             && request.resource.data.title.size() >= 1
+             && request.resource.data.title.size() <= 120
+             && request.resource.data.desc is string
+             && request.resource.data.desc.size() <= 1000
+             && request.resource.data.url is string
+             && request.resource.data.url.matches('https://.*')
+             && request.resource.data.url.size() <= 500
+             && request.resource.data.icon is string
+             && request.resource.data.icon.size() <= 20
+             && request.resource.data.cat is string
+             && request.resource.data.diff is number
+             && request.resource.data.diff >= 1
+             && request.resource.data.diff <= 5
+             && request.resource.data.order is number;
+    }
+  }
+}
